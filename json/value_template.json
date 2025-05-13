@@ -1,0 +1,258 @@
+{
+    "config": {
+        "simulated_hours": 1,
+        "simple_display": true
+    },
+    "player":
+    {
+        "food_cost": 0,
+        "food_health": 0,
+        "potion_cost": 0,
+        "potent_level": 8,
+
+        "preserve_dungeon_chance": 0.0,
+        "additional_coins_chance": 0.0,
+
+        "double_loot_chance": 0.0,
+
+        "mastery_potent": 0,
+        "mastery_savage": 0,
+        "insatiable_consume_rate": 0.0,
+        "savage_bone_drop_chance": 0.0
+        
+    },
+    "dungeon": [
+        {
+            "level": 100,
+            "monsters_hour": 0,
+            "food_hour": 0,
+
+            "drops": {
+                "gold": {
+                    "gold_min": 1,
+                    "gold_max": 1250,
+                    "rate": 0.8
+                },
+                "bone": {
+                    "name": "Giant Fang",
+                    "rate": 1
+                },
+                "bone_one": {
+                    "name": "Giant Bone",
+                    "rate": 0
+                },
+                "bone_two": {
+                    "name": "Large Fang",
+                    "rate": 0
+                },
+                "log": {
+                    "name": "Ancient Log",
+                    "rate": 0.0475
+                },
+                "ore": {
+                    "name": "Infernal Ore",
+                    "rate": 0.0475
+                },
+                "flower": {
+                    "name": "Snapdragon",
+                    "rate": 0.0475
+                },
+                "fish": {
+                    "name": "King Crab",
+                    "rate": 0.0475
+                },
+                "gem_one": {
+                    "name": "Moonstone",
+                    "rate": 0.005
+                },
+                "gem_two": {
+                    "name": "Onyx",
+                    "rate": 0.005
+                }
+            }
+        }
+    ],
+    "key_values":
+    [
+        {
+            "level": 25,
+            "cost": 0
+        },
+        {
+            "level": 40,
+            "cost": 0
+        },
+        {
+            "level": 55,
+            "cost": 0
+        },
+        {
+            "level": 70,
+            "cost": 0
+        },
+        {
+            "level": 85,
+            "cost": 0
+        },
+        {
+            "level": 100,
+            "cost": 0
+        }
+    ],
+    "log": {
+        "Pine Log": {
+            "value": 0
+        },
+        "Spruce Log": {
+            "value": 0
+        },
+        "Birch Log": {
+            "value": 0
+        },
+        "Teak Log": {
+            "value": 0
+        },
+        "Mahogany Log": {
+            "value": 0
+        },
+        "Ironbark Log": {
+            "value": 0
+        },
+        "Redwood Log": {
+            "value": 0
+        },
+        "Ancient Log": {
+            "value": 0
+        }
+    },
+    "ore": {
+        "Copper Ore": {
+            "value": 0
+        },
+        "Iron Ore": {
+            "value": 0
+        },
+        "Silver Ore": {
+            "value": 0
+        },
+        "Gold Ore": {
+            "value": 0
+        },
+        "Cobalt Ore": {
+            "value": 0
+        },
+        "Obsidian Ore": {
+            "value": 0
+        },
+        "Astral Ore": {
+            "value": 0
+        },
+        "Infernal Ore": {
+            "value": 0
+        }
+    },
+    "flower": {
+        "Peony": {
+            "value": 0
+        },
+        "Tulip": {
+            "value": 0
+        },
+        "Rose": {
+            "value": 0
+        },
+        "Daisy": {
+            "value": 0
+        },
+        "Lilac": {
+            "value": 0
+        },
+        "Hyacinth": {
+            "value": 0
+        },
+        "Nemesia": {
+            "value": 0
+        },
+        "Snapdragon": {
+            "value": 0
+        }
+    },
+    "fish": {
+        "Shrimp": {
+            "value": 0
+        },
+        "Cod": {
+            "value": 0
+        },
+        "Salmon": {
+            "value": 0
+        },
+        "Bass": {
+            "value": 0
+        },
+        "Lobster": {
+            "value": 0
+        },
+        "Swordfish": {
+            "value": 0
+        },
+        "Shark": {
+            "value": 0
+        },
+        "King Crab": {
+            "value": 0
+        }
+    },
+    "gemstone": {
+        "Ruby": {
+            "value": 0
+        },
+        "Topaz": {
+            "value": 0
+        },
+        "Emerald": {
+            "value": 0
+        },
+        "Amethyst": {
+            "value": 0
+        },
+        "Citrine": {
+            "value": 0
+        },
+        "Diamond": {
+            "value": 0
+        },
+        "Moonstone": {
+            "value": 0
+        },
+        "Onyx": {
+            "value": 0
+        }
+    },
+    "bone": {
+        "Bone": {
+            "value": 0
+        },
+        "Fang": {
+            "value": 0
+        },
+        "Medium Bone": {
+            "value": 0
+        },
+        "Medium Fang": {
+            "value": 0
+        },
+        "Large Bone": {
+            "value": 0
+        },
+        "Large Fang": {
+            "value": 0
+        },
+        "Giant Bone": {
+            "value": 0
+        },
+        "Giant Fang": {
+            "value": 0
+        }
+    }
+}
