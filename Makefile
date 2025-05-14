@@ -1,5 +1,5 @@
 CC := gcc
-CFLAGS := -Wall -Wextra -std=c89 -pedantic
+CFLAGS := -Wall -Wextra -std=c89 -pedantic -g
 
 SRC_DIR := src
 BUILD_DIR := build
@@ -28,6 +28,8 @@ $(TARGET): $(OBJS)
 $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 	$(CC) $(CFLAGS) -c $^ -o $@
 
-# Clean build files
 clean:
 	rm -rf $(BUILD_DIR)
+
+run: 
+	./$(TARGET)

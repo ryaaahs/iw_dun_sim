@@ -2,6 +2,7 @@
 *.d
 .vscode
 /build
+values.json
 
 # Object files
 *.o

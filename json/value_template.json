@@ -99,7 +99,7 @@
             "cost": 0
         }
     ],
-    "log": {
+    "logs": {
         "Pine Log": {
             "value": 0
         },
@@ -125,7 +125,7 @@
             "value": 0
         }
     },
-    "ore": {
+    "ores": {
         "Copper Ore": {
             "value": 0
         },
@@ -151,7 +151,7 @@
             "value": 0
         }
     },
-    "flower": {
+    "flowers": {
         "Peony": {
             "value": 0
         },
@@ -177,7 +177,7 @@
             "value": 0
         }
     },
-    "fish": {
+    "fishes": {
         "Shrimp": {
             "value": 0
         },
@@ -203,7 +203,7 @@
             "value": 0
         }
     },
-    "gemstone": {
+    "gemstones": {
         "Ruby": {
             "value": 0
         },
@@ -229,7 +229,7 @@
             "value": 0
         }
     },
-    "bone": {
+    "bones": {
         "Bone": {
             "value": 0
         },
