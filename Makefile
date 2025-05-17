@@ -3,6 +3,7 @@ CFLAGS := -Wall -Wextra -std=c89 -pedantic -g
 
 SRC_DIR := src
 BUILD_DIR := build
+ARGS := values.json
 
 # Pattern match all the C files within source
 SRCS := $(wildcard $(SRC_DIR)/*.c)
@@ -17,6 +18,7 @@ all: $(BUILD_DIR) $(TARGET)
 # Create build directory if it doesn't exist
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
+	cp ./json/values.json $(BUILD_DIR)/
 
 # $^ All prerequisites of the rule (places in $(OBJS))
 # $@ Name of the target to produc (build/iw_dun_sim)
@@ -32,4 +34,4 @@ clean:
 	rm -rf $(BUILD_DIR)
 
 run: 
-	./$(TARGET)
+	./$(TARGET) ./$(BUILD_DIR)/$(ARGS)

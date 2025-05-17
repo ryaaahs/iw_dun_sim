@@ -1,7 +1,29 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 #include "parson.h"
+#include <unistd.h>
 
-int main(void) {
+
+double rand_zero_one() {
+    return (double)rand() / RAND_MAX;
+}
+
+int rand_number_range(int min, int max) {
+    return rand() % (max + 1 - min) + min;
+}
+
+int main(int argc, char *argv[]) {
+    srand(time(NULL));
+    char* file_name;
+
+    if (argc == 1) {
+        printf("Please pass in a file name that exists in the current diectory.\n");
+        printf("Ex: iw_dun_sim value.json\n"); 
+    } else if (argc == 2) {
+        file_name = argv[1];
+    }
+
     JSON_Value *root_value;
     JSON_Object *game_values;
     JSON_Object *config;
@@ -18,7 +40,7 @@ int main(void) {
     JSON_Object *bones;*/
     
     /* Get access to the json and confirm the root value is a json type */ 
-    root_value = json_parse_file("json/values.json");
+    root_value = json_parse_file(file_name);
     if (json_value_get_type(root_value) != JSONObject) {
         fprintf(stderr, "%s", "Incorrect JSON\n");
         return -1;
@@ -77,5 +99,6 @@ int main(void) {
         printf("%f\n", json_object_dotget_number(dungeon, "drops.gold.gold_max"));
     }
 
+    json_value_free(root_value);
     return 0;
 }
