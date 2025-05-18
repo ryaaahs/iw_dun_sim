@@ -2,7 +2,8 @@
 *.d
 .vscode
 /build
-values.json
+simulation_values.json
+market_data.json
 
 # Object files
 *.o

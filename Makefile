@@ -18,7 +18,7 @@ all: $(BUILD_DIR) $(TARGET)
 # Create build directory if it doesn't exist
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
-	cp ./json/values.json $(BUILD_DIR)/
+	cp ./json/simulation_values.json $(BUILD_DIR)/simulation_values.json
 
 # $^ All prerequisites of the rule (places in $(OBJS))
 # $@ Name of the target to produc (build/iw_dun_sim)
