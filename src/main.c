@@ -1,9 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "parson.h"
 #include <unistd.h>
-
+#include <limits.h>
+#include "parson.h"
+#include "market_parser.h"
 
 double rand_zero_one() {
     return (double)rand() / RAND_MAX;
@@ -14,22 +15,8 @@ int rand_number_range(int min, int max) {
 }
 
 int main(int argc, char *argv[]) {
-    srand(time(NULL));
     char* file_name;
     int parse_market_file = 1;
-
-    if (argc == 1) {
-        printf("Please pass in a file name that exists in the current diectory.\n");
-        printf("Arg 1 (string): file name containing simulation data");
-        printf("Arg 2 (bool) [Default: 1]: Parse market_data.json to fill value.json");
-        printf("Ex: iw_dun_sim value.json\n"); 
-    } else if (argc == 2) {
-        file_name = argv[1];
-    }
-
-    if (argc == 3) {
-        parse_market_file = argv[2];
-    }
 
     JSON_Value *root_value;
     JSON_Object *game_values;
@@ -37,6 +24,22 @@ int main(int argc, char *argv[]) {
     JSON_Array *dungeons;
     JSON_Object *dungeon;
     JSON_Object *player;
+    size_t i;
+
+    srand(time(NULL));
+
+    if (argc == 1) {
+        printf("Please pass in a file name that exists in the current diectory.\n");
+        printf("Arg 1 (string): file name containing simulation data");
+        printf("Arg 2 (bool) [Default: 1]: Parse market_data.json to fill simulation_values.json");
+        printf("Ex: iw_dun_sim simulation_values.json\n"); 
+    } else if (argc == 2) {
+        file_name = argv[1];
+    }
+
+    if (argc == 3) {
+        parse_market_file = strtol(argv[2], NULL, 10);
+    }
 
     /* Get access to the json and confirm the root value is a json type */ 
     root_value = json_parse_file(file_name);
@@ -50,8 +53,6 @@ int main(int argc, char *argv[]) {
     player = json_object_get_object(game_values, "player");
     dungeons = json_object_get_array(game_values, "dungeons");
 
-    size_t i;
-
     /* Dungeon loop */
     for (i = 0; i < json_array_get_count(dungeons); i++) {
         dungeon = json_array_get_object(dungeons, i);
@@ -62,6 +63,9 @@ int main(int argc, char *argv[]) {
         printf("%f\n", json_object_dotget_number(dungeon, "drops.gold.gold_min"));
         printf("%f\n", json_object_dotget_number(dungeon, "drops.gold.gold_max"));
     }
+
+    if (parse_market_file)
+        parse_market_data();
 
     json_value_free(root_value);
     return 0;
