@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (parse_market_file)
-        parse_market_data();
+        parse_market_data(root_value); 
 
     json_value_free(root_value);
     return 0;
