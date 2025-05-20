@@ -167,6 +167,7 @@ int main(int argc, char *argv[]) {
         printf("-------------------------------\n");
         printf("Usage\n");
         printf("Simulated Hours: %d\n", SIMULATED_HOURS);
+        if (SIMULATED_HOURS > 1) printf("Rolls (AVG Hours): %d\n", rolls / SIMULATED_HOURS);
         printf("Rolls: %d\n", rolls);
         printf("Double Loot Procs: %d\n", total_double_loot_procs);
         printf("Total Keys: %d\n", (SIMULATED_HOURS * KEYS_PER_HOUR));
@@ -218,6 +219,21 @@ int main(int argc, char *argv[]) {
             if (drop_rates->gem_two_rate >= rand_zero_one()) {
                 total_matierals->total_gem_two += rand_number_range(1, 2);
             }
+        }
+
+        if (SIMULATED_HOURS > 1) {
+            printf("Loot (AVG Hours)\n");
+            printf("Gold: %ld\n", total_matierals->total_gold);
+            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.bone.name"), total_matierals->total_bone / SIMULATED_HOURS);
+            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.bone_one.name"), total_matierals->total_bone_one / SIMULATED_HOURS);
+            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.bone_two.name"), total_matierals->total_bone_two / SIMULATED_HOURS);
+            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.log.name"), total_matierals->total_logs / SIMULATED_HOURS);
+            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.ore.name"), total_matierals->total_ores / SIMULATED_HOURS);
+            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.flower.name"), total_matierals->total_flowers / SIMULATED_HOURS);
+            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.fish.name"), total_matierals->total_fishes / SIMULATED_HOURS);
+            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.gem_one.name"), total_matierals->total_gem_one / SIMULATED_HOURS);
+            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.gem_two.name"), total_matierals->total_gem_two / SIMULATED_HOURS);
+            printf("-------------------------------\n");
         }
 
         printf("Loot\n");
