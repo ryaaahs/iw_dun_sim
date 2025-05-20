@@ -66,16 +66,6 @@ struct Item {
     float rate;
 };
 
-struct DropRates {
-    float gold_rate;
-    float log_rate;
-    float ore_rate;
-    float flower_rate;
-    float fish_rate;
-    float gem_one_rate;
-    float gem_two_rate;
-}; 
-
 int main(int argc, char *argv[]) {
     char* file_name;
     int parse_market_file = 1;
@@ -91,6 +81,7 @@ int main(int argc, char *argv[]) {
     size_t i;
     size_t j;
     size_t k;
+    size_t n;
 
     unsigned int SIMULATED_HOURS;
     float PLAYER_KEY_PRESERVE;
@@ -156,7 +147,6 @@ int main(int argc, char *argv[]) {
                 loot
     */
     for (i = 0; i < json_array_get_count(dungeons); i++) {
-        struct DropRates *drop_rates;
         struct MaterialsProduced *total_matierals; 
         struct Item *item_drops;
 
@@ -166,7 +156,6 @@ int main(int argc, char *argv[]) {
 
         for (j = 0; j < json_array_get_count(drops); j++) {
             drop = json_array_get_object(drops, j);
-
             item_drops[j].name = json_object_get_string(drop, "name");
             item_drops[j].tag = json_object_get_string(drop, "tag");
             item_drops[j].key = json_object_get_string(drop, "key");
@@ -175,7 +164,6 @@ int main(int argc, char *argv[]) {
             item_drops[j].rate = json_object_get_number(drop, "rate");
         }
 
-        drop_rates = malloc(sizeof(struct DropRates));
         total_matierals = malloc(sizeof(struct MaterialsProduced));
 
         KEYS_PER_HOUR = json_object_dotget_number(dungeon, "monsters_hour") / 3;
@@ -332,7 +320,6 @@ int main(int argc, char *argv[]) {
         printf("-------------------------------\n");
 
         free(item_drops);
-        free(drop_rates);
         free(total_matierals); 
     }
 
