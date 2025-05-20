@@ -64,6 +64,7 @@ int main(int argc, char *argv[]) {
     unsigned int rolls = 0;
     unsigned int total_keys_used = 0;
     unsigned int total_preserved_keys = 0;
+    unsigned int total_double_loot_procs = 0;
 
     srand(time(NULL));
 
@@ -153,15 +154,13 @@ int main(int argc, char *argv[]) {
             rolls += 3;
             total_keys_used++;
 
-            if (PLAYER_KEY_PRESERVE > 0 && PLAYER_KEY_PRESERVE >= rand_zero_one()) {
-                --j; 
+            if (PLAYER_KEY_PRESERVE > 0 && PLAYER_KEY_PRESERVE >= rand_zero_one()) { 
                 total_preserved_keys++;
             }
 
-            for (k = 0; k < 3; k++) {
-                if (PLAYER_DOUBLE_LOOT_CHANCE >= rand_zero_one()) {
-                    rolls++; 
-                }
+            if (PLAYER_DOUBLE_LOOT_CHANCE >= rand_zero_one()) {
+                rolls += 3; 
+                total_double_loot_procs++;
             }
         }
 
@@ -169,9 +168,9 @@ int main(int argc, char *argv[]) {
         printf("Usage\n");
         printf("Simulated Hours: %d\n", SIMULATED_HOURS);
         printf("Rolls: %d\n", rolls);
+        printf("Double Loot Procs: %d\n", total_double_loot_procs);
         printf("Total Keys: %d\n", (SIMULATED_HOURS * KEYS_PER_HOUR));
-        printf("Total keys used: %d\n", total_keys_used);
-        printf("Total keys preserved: %d\n", total_preserved_keys);
+        printf("Total Keys Preserved: %d\n", total_preserved_keys);
         printf("-------------------------------\n");
 
         /* Run rolls aganist loot rates */ 
