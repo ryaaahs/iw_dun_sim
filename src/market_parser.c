@@ -28,14 +28,14 @@ int parse_market_data(JSON_Value *sim_root_value) {
     
     if (access(MARKET_DATA_JSON, F_OK) != 0) {
         fprintf(stderr, "File not found in JSON folder: %s\n", MARKET_DATA_JSON);
-        return 0;
+        return -1;
     }
     
     market_root_value = json_parse_file(MARKET_DATA_JSON);
 
     if (json_value_get_type(market_root_value) != JSONObject) {
         fprintf(stderr, "%s", "Incorrect JSON, expecting JSONObject\n");
-        return 0;
+        return -1;
     }
 
     d100_pc = malloc(sizeof(struct D100PriceContainer));
@@ -97,16 +97,9 @@ int parse_market_data(JSON_Value *sim_root_value) {
         }        
     }
     
-    printf("al:%f\n", d100_pc->ancient_log_price);
-    printf("io:%f\n", d100_pc->infernal_ore_price);
-    printf("sd:%f\n", d100_pc->snapdragon_price);
-    printf("kc:%f\n", d100_pc->king_crab_price);
-    printf("ms:%f\n", d100_pc->moonstone_price);
-    printf("o:%f\n", d100_pc->onyx_price);
-
     if (serialize_sim_data(sim_root_value, d100_pc) == -1) {
         fprintf(stderr, "%s", "Failure in serialize_sim_data()\n");
-        return 0;
+        return -1;
     }
 
     free(d100_pc);
@@ -126,6 +119,7 @@ int serialize_sim_data(JSON_Value *sim_root_value, struct D100PriceContainer *d1
 
     if (json_serialize_to_file_pretty(sim_root_value, SIMULATION_VALUES_JSON) != JSONSuccess) {
         fprintf(stderr, "Failed to write updated JSON\n");
+        return -1;
     }
 
     return 0;
