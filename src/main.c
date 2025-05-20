@@ -14,6 +14,35 @@ int rand_number_range(int min, int max) {
     return rand() % (max + 1 - min) + min;
 }
 
+// https://stackoverflow.com/a/1449859
+void printf_commas(int value) {
+    int value_container = 0;
+    int scale = 1;
+    
+    // Print a negative sign and flip the value to positive for remaining calulcation
+    if (value < 0) {
+        printf ("-");
+        value = -value;
+    }
+
+    // Scale the value down to the lowest denomination and print it
+    while (value >= 1000) {
+        value_container = value_container + scale * (value % 1000);
+        value /= 1000;
+        scale *= 1000;
+    }
+    printf ("%d", value);
+
+    // Work our way back up using the value container and scale.
+    while (scale != 1) {
+        scale /= 1000;
+        value = value_container / scale;
+        value_container = value_container % scale;
+        printf (",%03d", value);
+    }
+    printf("\n");
+}
+
 struct MaterialsProduced {
     long int total_gold;
     long int total_bone;
@@ -166,12 +195,14 @@ int main(int argc, char *argv[]) {
 
         printf("-------------------------------\n");
         printf("Usage\n");
-        printf("Simulated Hours: %d\n", SIMULATED_HOURS);
-        if (SIMULATED_HOURS > 1) printf("Rolls (AVG Hours): %d\n", rolls / SIMULATED_HOURS);
-        printf("Rolls: %d\n", rolls);
-        printf("Double Loot Procs: %d\n", total_double_loot_procs);
-        printf("Total Keys: %d\n", (SIMULATED_HOURS * KEYS_PER_HOUR));
-        printf("Total Keys Preserved: %d\n", total_preserved_keys);
+        printf("Simulated Hours: "); printf_commas(SIMULATED_HOURS);
+        if (SIMULATED_HOURS > 1) {
+            printf("Rolls (AVG Hours): "); printf_commas(rolls / SIMULATED_HOURS);
+        } 
+        printf("Rolls: "); printf_commas(rolls);
+        printf("Double Loot Procs: ");  printf_commas(total_double_loot_procs);
+        printf("Total Keys: "); printf_commas((SIMULATED_HOURS * KEYS_PER_HOUR));
+        printf("Total Keys Preserved: "); printf_commas(total_preserved_keys);
         printf("-------------------------------\n");
 
         /* Run rolls aganist loot rates */ 
@@ -223,30 +254,30 @@ int main(int argc, char *argv[]) {
 
         if (SIMULATED_HOURS > 1) {
             printf("Loot (AVG Hours)\n");
-            printf("Gold: %ld\n", total_matierals->total_gold);
-            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.bone.name"), total_matierals->total_bone / SIMULATED_HOURS);
-            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.bone_one.name"), total_matierals->total_bone_one / SIMULATED_HOURS);
-            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.bone_two.name"), total_matierals->total_bone_two / SIMULATED_HOURS);
-            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.log.name"), total_matierals->total_logs / SIMULATED_HOURS);
-            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.ore.name"), total_matierals->total_ores / SIMULATED_HOURS);
-            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.flower.name"), total_matierals->total_flowers / SIMULATED_HOURS);
-            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.fish.name"), total_matierals->total_fishes / SIMULATED_HOURS);
-            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.gem_one.name"), total_matierals->total_gem_one / SIMULATED_HOURS);
-            printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.gem_two.name"), total_matierals->total_gem_two / SIMULATED_HOURS);
+            printf("Gold: "); printf_commas(total_matierals->total_gold / SIMULATED_HOURS);
+            printf("%s: ", json_object_dotget_string(dungeon, "drops.bone.name")); printf_commas(total_matierals->total_bone / SIMULATED_HOURS);
+            printf("%s: ", json_object_dotget_string(dungeon, "drops.bone_one.name")); printf_commas(total_matierals->total_bone_one / SIMULATED_HOURS);
+            printf("%s: ", json_object_dotget_string(dungeon, "drops.bone_two.name")); printf_commas(total_matierals->total_bone_two / SIMULATED_HOURS);
+            printf("%s: ", json_object_dotget_string(dungeon, "drops.log.name")); printf_commas(total_matierals->total_logs / SIMULATED_HOURS);
+            printf("%s: ", json_object_dotget_string(dungeon, "drops.ore.name")); printf_commas(total_matierals->total_ores / SIMULATED_HOURS);
+            printf("%s: ", json_object_dotget_string(dungeon, "drops.flower.name")); printf_commas(total_matierals->total_flowers / SIMULATED_HOURS);
+            printf("%s: ", json_object_dotget_string(dungeon, "drops.fish.name")); printf_commas(total_matierals->total_fishes / SIMULATED_HOURS);
+            printf("%s: ", json_object_dotget_string(dungeon, "drops.gem_one.name")); printf_commas(total_matierals->total_gem_one / SIMULATED_HOURS);
+            printf("%s: ", json_object_dotget_string(dungeon, "drops.gem_two.name")); printf_commas(total_matierals->total_gem_two / SIMULATED_HOURS);
             printf("-------------------------------\n");
         }
 
         printf("Loot\n");
-        printf("Gold: %ld\n", total_matierals->total_gold);
-        printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.bone.name"), total_matierals->total_bone);
-        printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.bone_one.name"), total_matierals->total_bone_one);
-        printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.bone_two.name"), total_matierals->total_bone_two);
-        printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.log.name"), total_matierals->total_logs);
-        printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.ore.name"), total_matierals->total_ores);
-        printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.flower.name"), total_matierals->total_flowers);
-        printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.fish.name"), total_matierals->total_fishes);
-        printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.gem_one.name"), total_matierals->total_gem_one);
-        printf("%s: %ld\n", json_object_dotget_string(dungeon, "drops.gem_two.name"), total_matierals->total_gem_two);
+        printf("Gold: "); printf_commas(total_matierals->total_gold);
+        printf("%s: ", json_object_dotget_string(dungeon, "drops.bone.name")); printf_commas(total_matierals->total_gold);
+        printf("%s: ", json_object_dotget_string(dungeon, "drops.bone_one.name")); printf_commas(total_matierals->total_bone_one);
+        printf("%s: ", json_object_dotget_string(dungeon, "drops.bone_two.name")); printf_commas(total_matierals->total_bone_two);
+        printf("%s: ", json_object_dotget_string(dungeon, "drops.log.name")); printf_commas(total_matierals->total_logs);
+        printf("%s: ", json_object_dotget_string(dungeon, "drops.ore.name")); printf_commas(total_matierals->total_ores);
+        printf("%s: ", json_object_dotget_string(dungeon, "drops.flower.name")); printf_commas(total_matierals->total_flowers);
+        printf("%s: ", json_object_dotget_string(dungeon, "drops.fish.name")); printf_commas(total_matierals->total_fishes);
+        printf("%s: ", json_object_dotget_string(dungeon, "drops.gem_one.name")); printf_commas(total_matierals->total_gem_one);
+        printf("%s: ", json_object_dotget_string(dungeon, "drops.gem_two.name")); printf_commas(total_matierals->total_gem_two);
         printf("-------------------------------\n");
 
         free(drop_rates);
