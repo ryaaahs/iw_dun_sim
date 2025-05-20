@@ -5,6 +5,9 @@
 #include "parson.h"
 
 struct D100PriceContainer {
+    double giant_fang_price;
+    double giant_bone_price;
+    double large_fang_price;
     double ancient_log_price;
     double infernal_ore_price;
     double snapdragon_price;
@@ -52,6 +55,27 @@ int parse_market_data(JSON_Value *sim_root_value) {
 
         /* TODO: Make this more generic with the other dungeons in the game */
         switch(id) {
+            case GIANT_FANG: 
+                if((cost < d100_pc->giant_fang_price && type == 1) || (cost > d100_pc->giant_fang_price && type == 2)) {
+                    d100_pc->giant_fang_price = cost;
+                } else if (d100_pc->giant_fang_price == 0) {
+                    d100_pc->giant_fang_price = cost;
+                }
+            break;
+            case GIANT_BONE: 
+                if((cost < d100_pc->giant_bone_price && type == 1) || (cost > d100_pc->giant_bone_price && type == 2)) {
+                    d100_pc->giant_bone_price = cost;
+                } else if (d100_pc->giant_bone_price == 0) {
+                    d100_pc->giant_bone_price = cost;
+                }
+            break;
+            case LARGE_FANG: 
+                if((cost < d100_pc->large_fang_price && type == 1) || (cost > d100_pc->large_fang_price && type == 2)) {
+                    d100_pc->large_fang_price = cost;
+                } else if (d100_pc->large_fang_price == 0) {
+                    d100_pc->large_fang_price = cost;
+                }
+            break;
             case ANCIENT_LOG_ID: 
                 if((cost < d100_pc->ancient_log_price && type == 1) || (cost > d100_pc->ancient_log_price && type == 2)) {
                     d100_pc->ancient_log_price = cost;
@@ -109,6 +133,10 @@ int parse_market_data(JSON_Value *sim_root_value) {
 
 int serialize_sim_data(JSON_Value *sim_root_value, struct D100PriceContainer *d100_pc) {
     JSON_Object *game_values = json_value_get_object(sim_root_value); 
+
+    json_object_dotset_number(game_values, "bones.giant_fang.value", d100_pc->giant_fang_price);
+    json_object_dotset_number(game_values, "bones.giant_bone.value", d100_pc->giant_bone_price);
+    json_object_dotset_number(game_values, "bones.large_fang.value", d100_pc->large_fang_price);
 
     json_object_dotset_number(game_values, "logs.ancient_log.value", d100_pc->ancient_log_price);
     json_object_dotset_number(game_values, "ores.infernal_ore.value", d100_pc->infernal_ore_price);
