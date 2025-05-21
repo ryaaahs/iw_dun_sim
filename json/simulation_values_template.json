@@ -1,14 +1,12 @@
 {
     "config": {
-        "simulated_hours": 1,
-        "simple_display": true
+        "simulated_hours": 1
     },
-    "player":
-    {
+    "player": {
         "food_cost": 0,
         "food_health": 0,
         "potion_cost": 0,
-        "potent_level": 8,
+        "potent_level": 0,
 
         "preserve_dungeon_chance": 0.0,
         "additional_coins_chance": 0.0,
@@ -19,239 +17,800 @@
         "mastery_savage": 0,
         "insatiable_consume_rate": 0.0,
         "savage_bone_drop_chance": 0.0
-        
     },
-    "dungeon": [
+    "dungeons": [
+        {
+            "level": 25,
+            "monsters_hour": 0,
+            "food_hour": 0,
+            "key": {
+                "id": 80,
+                "name": "Dungeon Key 25",
+                "tag": "dungeon_key_25",
+                "key": "key"
+            },
+            "drops": [
+                {
+                    "id": -1,
+                    "name": "Gold",
+                    "tag": "gold",
+                    "key": "gold",
+                    "min": 1,
+                    "max": 300,
+                    "rate": 0.80000000000000004
+                },
+                {
+                    "id": 406,
+                    "name": "Medium Bone",
+                    "tag": "medium_bone",
+                    "key": "bone",
+                    "min": 0,
+                    "max": 0,
+                    "rate": 1
+                },
+                {
+                    "id": 405,
+                    "name": "Fang",
+                    "tag": "fang",
+                    "key": "bone_one",
+                    "min": 0,
+                    "max": 0,
+                    "rate": 0
+                },
+                {
+                    "id": 400,
+                    "name": "bone",
+                    "tag": "bone",
+                    "key": "bone_two",
+                    "min": 0,
+                    "max": 0,
+                    "rate": 0
+                },
+                {
+                    "id": 12,
+                    "name": "Birch Log",
+                    "tag": "birch_log",
+                    "key": "log",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 22,
+                    "name": "Silver Ore",
+                    "tag": "silver_ore",
+                    "key": "ore",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 352,
+                    "name": "Rose",
+                    "tag": "rose",
+                    "key": "flower",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 311,
+                    "name": "Raw Salmon",
+                    "tag": "raw_salmon",
+                    "key": "fish",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 31,
+                    "name": "Topaz",
+                    "tag": "topaz",
+                    "key": "gemstone_one",
+                    "min": 1,
+                    "max": 2,
+                    "rate": 0.0050000000000000001
+                },
+                {
+                    "id": 32,
+                    "name": "Emerald",
+                    "tag": "emerald",
+                    "key": "gemstone_two",
+                    "min": 1,
+                    "max": 2,
+                    "rate": 0.0050000000000000001
+                }
+            ]
+        },
+        {
+            "level": 40,
+            "monsters_hour": 0,
+            "food_hour": 0,
+            "key": {
+                "id": 81,
+                "name": "Dungeon Key 40",
+                "tag": "dungeon_key_40",
+                "key": "key"
+            },
+            "drops": [
+                {
+                    "id": -1,
+                    "name": "Gold",
+                    "tag": "gold",
+                    "key": "gold",
+                    "min": 1,
+                    "max": 425,
+                    "rate": 0.80000000000000004
+                },
+                {
+                    "id": 407,
+                    "name": "Medium Fang",
+                    "tag": "medium_fang",
+                    "key": "bone",
+                    "min": 0,
+                    "max": 0,
+                    "rate": 1
+                },
+                {
+                    "id": 406,
+                    "name": "Medium Bone",
+                    "tag": "medium_bone",
+                    "key": "bone_one",
+                    "min": 0,
+                    "max": 0,
+                    "rate": 0
+                },
+                {
+                    "id": 405,
+                    "name": "Fang",
+                    "tag": "fang",
+                    "key": "bone_two",
+                    "min": 0,
+                    "max": 0,
+                    "rate": 0
+                },
+                {
+                    "id": 13,
+                    "name": "Teak Log",
+                    "tag": "teak_log",
+                    "key": "log",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 23,
+                    "name": "Gold Ore",
+                    "tag": "gold_ore",
+                    "key": "ore",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 353,
+                    "name": "Daisy",
+                    "tag": "daisy",
+                    "key": "flower",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 314,
+                    "name": "Raw Bass",
+                    "tag": "raw_bass",
+                    "key": "fish",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 32,
+                    "name": "Emerald",
+                    "tag": "emerald",
+                    "key": "gemstone_one",
+                    "min": 1,
+                    "max": 2,
+                    "rate": 0.0050000000000000001
+                },
+                {
+                    "id": 33,
+                    "name": "Amethyst",
+                    "tag": "amethyst",
+                    "key": "gemstone_two",
+                    "min": 1,
+                    "max": 2,
+                    "rate": 0.0050000000000000001
+                }
+            ]
+        },
+        {
+            "level": 55,
+            "monsters_hour": 0,
+            "food_hour": 0,
+            "key": {
+                "id": 82,
+                "name": "Dungeon Key 55",
+                "tag": "dungeon_key_55",
+                "key": "key"
+            },
+            "drops": [
+                {
+                    "id": -1,
+                    "name": "Gold",
+                    "tag": "gold",
+                    "key": "gold",
+                    "min": 1,
+                    "max": 550,
+                    "rate": 0.80000000000000004
+                },
+                {
+                    "id": 408,
+                    "name": "Large Bone",
+                    "tag": "large_bone",
+                    "key": "bone",
+                    "min": 0,
+                    "max": 0,
+                    "rate": 1
+                },
+                {
+                    "id": 407,
+                    "name": "Medium Fang",
+                    "tag": "medium_fang",
+                    "key": "bone_one",
+                    "min": 0,
+                    "max": 0,
+                    "rate": 0
+                },
+                {
+                    "id": 406,
+                    "name": "Medium Bone",
+                    "tag": "medium_bone",
+                    "key": "bone_two",
+                    "min": 0,
+                    "max": 0,
+                    "rate": 0
+                },
+                {
+                    "id": 14,
+                    "name": "Mahogany Log",
+                    "tag": "mahogany_log",
+                    "key": "log",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 24,
+                    "name": "Cobalt Ore",
+                    "tag": "cobalt_ore",
+                    "key": "ore",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 354,
+                    "name": "Lilac",
+                    "tag": "lilac",
+                    "key": "flower",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 317,
+                    "name": "Raw Lobster",
+                    "tag": "raw_lobster",
+                    "key": "fish",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 33,
+                    "name": "Amethyst",
+                    "tag": "amethyst",
+                    "key": "gemstone_one",
+                    "min": 1,
+                    "max": 2,
+                    "rate": 0.0050000000000000001
+                },
+                {
+                    "id": 35,
+                    "name": "Citrine",
+                    "tag": "citrine",
+                    "key": "gemstone_two",
+                    "min": 1,
+                    "max": 2,
+                    "rate": 0.0050000000000000001
+                }
+            ]
+        },
+        {
+            "level": 70,
+            "monsters_hour": 0,
+            "food_hour": 0,
+            "key": {
+                "id": 83,
+                "name": "Dungeon Key 70",
+                "tag": "dungeon_key_70",
+                "key": "key"
+            },
+            "drops": [
+                {
+                    "id": -1,
+                    "name": "Gold",
+                    "tag": "gold",
+                    "key": "gold",
+                    "min": 1,
+                    "max": 700,
+                    "rate": 0.80000000000000004
+                },
+                {
+                    "id": 409,
+                    "name": "Large Fang",
+                    "tag": "large_fang",
+                    "key": "bone",
+                    "min": 0,
+                    "max": 0,
+                    "rate": 1
+                },
+                {
+                    "id": 408,
+                    "name": "Large Bone",
+                    "tag": "large_bone",
+                    "key": "bone_one",
+                    "min": 0,
+                    "max": 0,
+                    "rate": 0
+                },
+                {
+                    "id": 407,
+                    "name": "Medium Fang",
+                    "tag": "medium_fang",
+                    "key": "bone_two",
+                    "min": 0,
+                    "max": 0,
+                    "rate": 0
+                },
+                {
+                    "id": 15,
+                    "name": "Ironbark Log",
+                    "tag": "ironbark_log",
+                    "key": "log",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 26,
+                    "name": "Obsidian Ore",
+                    "tag": "obsidian_ore",
+                    "key": "ore",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 355,
+                    "name": "Hyacinth",
+                    "tag": "hyacinth",
+                    "key": "flower",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 320,
+                    "name": "Raw Swordfish",
+                    "tag": "raw_swordfish",
+                    "key": "fish",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 35,
+                    "name": "Citrine",
+                    "tag": "citrine",
+                    "key": "gemstone_one",
+                    "min": 1,
+                    "max": 2,
+                    "rate": 0.0050000000000000001
+                },
+                {
+                    "id": 34,
+                    "name": "Diamond",
+                    "tag": "diamond",
+                    "key": "gemstone_two",
+                    "min": 1,
+                    "max": 2,
+                    "rate": 0.0050000000000000001
+                }
+            ]
+        },
+        {
+            "level": 85,
+            "monsters_hour": 0,
+            "food_hour": 0,
+            "key": {
+                "id": 84,
+                "name": "Dungeon Key 85",
+                "tag": "dungeon_key_85",
+                "key": "key"
+            },
+            "drops": [
+                {
+                    "id": -1,
+                    "name": "Gold",
+                    "tag": "gold",
+                    "key": "gold",
+                    "min": 1,
+                    "max": 900,
+                    "rate": 0.80000000000000004
+                },
+                {
+                    "id": 410,
+                    "name": "Giant Bone",
+                    "tag": "giant_fang",
+                    "key": "bone",
+                    "min": 0,
+                    "max": 0,
+                    "rate": 1
+                },
+                {
+                    "id": 409,
+                    "name": "Large Fang",
+                    "tag": "large_fang",
+                    "key": "bone_one",
+                    "min": 0,
+                    "max": 0,
+                    "rate": 0
+                },
+                {
+                    "id": 408,
+                    "name": "Large Bone",
+                    "tag": "large_bone",
+                    "key": "bone_two",
+                    "min": 0,
+                    "max": 0,
+                    "rate": 0
+                },
+                {
+                    "id": 16,
+                    "name": "Redwood Log",
+                    "tag": "redwood_log",
+                    "key": "log",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 27,
+                    "name": "Astral Ore",
+                    "tag": "astral_ore",
+                    "key": "ore",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 356,
+                    "name": "Nemesia",
+                    "tag": "nemesia",
+                    "key": "flower",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 325,
+                    "name": "Raw Shark",
+                    "tag": "raw_shark",
+                    "key": "fish",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
+                },
+                {
+                    "id": 34,
+                    "name": "Diamond",
+                    "tag": "diamond",
+                    "key": "gemstone_one",
+                    "min": 1,
+                    "max": 2,
+                    "rate": 0.0050000000000000001
+                },
+                {
+                    "id": 36,
+                    "name": "Moonstone",
+                    "tag": "moonstone",
+                    "key": "gemstone_two",
+                    "min": 1,
+                    "max": 2,
+                    "rate": 0.0050000000000000001
+                }
+            ]
+        },
         {
             "level": 100,
             "monsters_hour": 0,
             "food_hour": 0,
-
-            "drops": {
-                "gold": {
-                    "gold_min": 1,
-                    "gold_max": 1250,
-                    "rate": 0.8
+            "key": {
+                "id": 85,
+                "name": "Dungeon Key 100",
+                "tag": "dungeon_key_100",
+                "key": "key"
+            },
+            "drops": [
+                {
+                    "id": -1,
+                    "name": "Gold",
+                    "tag": "gold",
+                    "key": "gold",
+                    "min": 1,
+                    "max": 1250,
+                    "rate": 0.80000000000000004
                 },
-                "bone": {
+                {
+                    "id": 411,
                     "name": "Giant Fang",
+                    "tag": "giant_fang",
+                    "key": "bone",
+                    "min": 0,
+                    "max": 0,
                     "rate": 1
                 },
-                "bone_one": {
+                {
+                    "id": 410,
                     "name": "Giant Bone",
+                    "tag": "giant_bone",
+                    "key": "bone_one",
+                    "min": 0,
+                    "max": 0,
                     "rate": 0
                 },
-                "bone_two": {
+                {
+                    "id": 409,
                     "name": "Large Fang",
+                    "tag": "large_fang",
+                    "key": "bone_two",
+                    "min": 0,
+                    "max": 0,
                     "rate": 0
                 },
-                "log": {
+                {
+                    "id": 17,
                     "name": "Ancient Log",
-                    "rate": 0.0475
+                    "tag": "ancient_log",
+                    "key": "log",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
                 },
-                "ore": {
+                {
+                    "id": 28,
                     "name": "Infernal Ore",
-                    "rate": 0.0475
+                    "tag": "infernal_ore",
+                    "key": "ore",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
                 },
-                "flower": {
+                {
+                    "id": 357,
                     "name": "Snapdragon",
-                    "rate": 0.0475
+                    "tag": "snapdragon",
+                    "key": "flower",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
                 },
-                "fish": {
+                {
+                    "id": 342,
                     "name": "King Crab",
-                    "rate": 0.0475
+                    "tag": "king_crab",
+                    "key": "fish",
+                    "min": 1,
+                    "max": 8,
+                    "rate": 0.047500000000000001
                 },
-                "gem_one": {
+                {
+                    "id": 36,
                     "name": "Moonstone",
-                    "rate": 0.005
+                    "tag": "moonstone",
+                    "key": "gemstone_one",
+                    "min": 1,
+                    "max": 2,
+                    "rate": 0.0050000000000000001
                 },
-                "gem_two": {
+                {
+                    "id": 37,
                     "name": "Onyx",
-                    "rate": 0.005
+                    "tag": "onyx",
+                    "key": "gemstone_two",
+                    "min": 1,
+                    "max": 2,
+                    "rate": 0.0050000000000000001
                 }
-            }
+            ]
         }
     ],
-    "key_values":
-    [
-        {
-            "level": 25,
-            "cost": 0
+    "keys": {
+        "dungeon_key_25": {
+            "value": 0
         },
-        {
-            "level": 40,
-            "cost": 0
+        "dungeon_key_40": {
+            "value": 0
         },
-        {
-            "level": 55,
-            "cost": 0
+        "dungeon_key_55": {
+            "value": 0
         },
-        {
-            "level": 70,
-            "cost": 0
+        "dungeon_key_70": {
+            "value": 0
         },
-        {
-            "level": 85,
-            "cost": 0
+        "dungeon_key_85": {
+            "value": 0
         },
-        {
-            "level": 100,
-            "cost": 0
+        "dungeon_key_100": {
+            "value": 0
         }
-    ],
+    },
     "logs": {
-        "Pine Log": {
+        "pine_log": {
             "value": 0
         },
-        "Spruce Log": {
+        "spruce_log": {
             "value": 0
         },
-        "Birch Log": {
+        "birch_log": {
             "value": 0
         },
-        "Teak Log": {
+        "teak_log": {
             "value": 0
         },
-        "Mahogany Log": {
+        "mahogany_log": {
             "value": 0
         },
-        "Ironbark Log": {
+        "ironbark_log": {
             "value": 0
         },
-        "Redwood Log": {
+        "redwood_log": {
             "value": 0
         },
-        "Ancient Log": {
+        "ancient_log": {
             "value": 0
         }
     },
     "ores": {
-        "Copper Ore": {
+        "copper_ore": {
             "value": 0
         },
-        "Iron Ore": {
+        "iron_ore": {
             "value": 0
         },
-        "Silver Ore": {
+        "silver_ore": {
             "value": 0
         },
-        "Gold Ore": {
+        "gold_ore": {
             "value": 0
         },
-        "Cobalt Ore": {
+        "cobalt_ore": {
             "value": 0
         },
-        "Obsidian Ore": {
+        "obsidian_ore": {
             "value": 0
         },
-        "Astral Ore": {
+        "astral_ore": {
             "value": 0
         },
-        "Infernal Ore": {
+        "infernal_ore": {
             "value": 0
         }
     },
     "flowers": {
-        "Peony": {
+        "peony": {
             "value": 0
         },
-        "Tulip": {
+        "tulip": {
             "value": 0
         },
-        "Rose": {
+        "rose": {
             "value": 0
         },
-        "Daisy": {
+        "daisy": {
             "value": 0
         },
-        "Lilac": {
+        "lilac": {
             "value": 0
         },
-        "Hyacinth": {
+        "hyacinth": {
             "value": 0
         },
-        "Nemesia": {
+        "nemesia": {
             "value": 0
         },
-        "Snapdragon": {
+        "snapdragon": {
             "value": 0
         }
     },
     "fishes": {
-        "Shrimp": {
+        "raw_shrimp": {
             "value": 0
         },
-        "Cod": {
+        "raw_cod": {
             "value": 0
         },
-        "Salmon": {
+        "raw_salmon": {
             "value": 0
         },
-        "Bass": {
+        "raw_bass": {
             "value": 0
         },
-        "Lobster": {
+        "raw_lobster": {
             "value": 0
         },
-        "Swordfish": {
+        "raw_swordfish": {
             "value": 0
         },
-        "Shark": {
+        "raw_shark": {
             "value": 0
         },
-        "King Crab": {
+        "king_crab": {
             "value": 0
         }
     },
     "gemstones": {
-        "Ruby": {
+        "ruby": {
             "value": 0
         },
-        "Topaz": {
+        "topaz": {
             "value": 0
         },
-        "Emerald": {
+        "emerald": {
             "value": 0
         },
-        "Amethyst": {
+        "amethyst": {
             "value": 0
         },
-        "Citrine": {
+        "citrine": {
             "value": 0
         },
-        "Diamond": {
+        "diamond": {
             "value": 0
         },
-        "Moonstone": {
+        "moonstone": {
             "value": 0
         },
-        "Onyx": {
+        "onyx": {
             "value": 0
         }
     },
     "bones": {
-        "Bone": {
+        "bone": {
             "value": 0
         },
-        "Fang": {
+        "fang": {
             "value": 0
         },
-        "Medium Bone": {
+        "medium_bone": {
             "value": 0
         },
-        "Medium Fang": {
+        "medium_fang": {
             "value": 0
         },
-        "Large Bone": {
+        "large_bone": {
             "value": 0
         },
-        "Large Fang": {
+        "large_fang": {
             "value": 0
         },
-        "Giant Bone": {
+        "giant_bone": {
             "value": 0
         },
-        "Giant Fang": {
+        "giant_fang": {
             "value": 0
         }
     }

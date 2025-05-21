@@ -18,7 +18,7 @@ struct PriceContainer {
     double gemstone_two_price;
 }; 
 
-int serialize_sim_data(JSON_Value *sim_root_value, struct PriceContainer *pc);
+int serialize_sim_data(JSON_Value *sim_root_value, struct PriceContainer *price_containers);
 
 int parse_market_data(JSON_Value *sim_root_value) {
     struct PriceContainer *price_containers;
@@ -36,10 +36,12 @@ int parse_market_data(JSON_Value *sim_root_value) {
     size_t j;
     size_t n;
 
+    /* Game will not display values over a certian value for items */
+    /* TODO: Figure out the formula that is used in game to determine this value for items */
     int MARKET_COST_OVERFLOW = 500;
 
     long int id;
-    int type;
+    int market_order_type;
     double cost;
     const char *key;
     
@@ -59,6 +61,7 @@ int parse_market_data(JSON_Value *sim_root_value) {
     dungeons = json_object_get_array(game_values, "dungeons");
     price_containers = malloc(json_array_get_count(dungeons) * sizeof(struct PriceContainer)); 
 
+    /* Initialize struct to remove valgrind errors */
     for (j = 0; j < json_array_get_count(dungeons); j++) {
         price_containers[j].key_price = 0.0;
         price_containers[j].bone_price = 0.0;
@@ -80,7 +83,7 @@ int parse_market_data(JSON_Value *sim_root_value) {
         id = strtol(json_object_get_string(listing, "itemId"), NULL, 10);
         /* Type 1 == Buy */
         /* Type 2 == Orders */
-        type = strtol(json_object_get_string(listing, "type"), NULL, 10);
+        market_order_type = strtol(json_object_get_string(listing, "type"), NULL, 10);
         cost = json_object_get_number(listing, "cost");
 
         for (n = 0; n < json_array_get_count(dungeons); n++) {
@@ -92,11 +95,11 @@ int parse_market_data(JSON_Value *sim_root_value) {
                 if (price_containers[n].key_price == 0.0) {
                     price_containers[n].key_price = cost;
                 } else {
-                    if (type == 1) {
+                    if (market_order_type == 1) {
                         if (cost < price_containers[n].key_price || cost > price_containers[n].key_price) {
                             price_containers[n].key_price = cost;
                         }
-                    } else if (type == 2) {
+                    } else if (market_order_type == 2) {
                         if (cost > price_containers[n].key_price) {
                             price_containers[n].key_price = cost;
                         }
@@ -119,11 +122,11 @@ int parse_market_data(JSON_Value *sim_root_value) {
                         if (price_containers[n].bone_price == 0.0) {
                             price_containers[n].bone_price = cost;
                         } else {
-                            if (type == 1) {
+                            if (market_order_type == 1) {
                                 if (cost < price_containers[n].bone_price || cost > price_containers[n].bone_price) {
                                     price_containers[n].bone_price = cost;
                                 }
-                            } else if (type == 2) {
+                            } else if (market_order_type == 2) {
                                 if (cost > price_containers[n].bone_price) {
                                     price_containers[n].bone_price = cost;
                                 }
@@ -136,11 +139,11 @@ int parse_market_data(JSON_Value *sim_root_value) {
                         if (price_containers[n].bone_one_price == 0.0) {
                             price_containers[n].bone_one_price = cost;
                         } else {
-                            if (type == 1) {
+                            if (market_order_type == 1) {
                                 if (cost < price_containers[n].bone_one_price || cost > price_containers[n].bone_one_price) {
                                     price_containers[n].bone_one_price = cost;
                                 }
-                            } else if (type == 2) {
+                            } else if (market_order_type == 2) {
                                 if (cost > price_containers[n].bone_one_price) {
                                     price_containers[n].bone_one_price = cost;
                                 }
@@ -153,11 +156,11 @@ int parse_market_data(JSON_Value *sim_root_value) {
                         if (price_containers[n].bone_two_price == 0.0) {
                             price_containers[n].bone_two_price = cost;
                         } else {
-                            if (type == 1) {
+                            if (market_order_type == 1) {
                                 if (cost < price_containers[n].bone_two_price || cost > price_containers[n].bone_two_price) {
                                     price_containers[n].bone_two_price = cost;
                                 }
-                            } else if (type == 2) {
+                            } else if (market_order_type == 2) {
                                 if (cost > price_containers[n].bone_two_price) {
                                     price_containers[n].bone_two_price = cost;
                                 }
@@ -170,11 +173,11 @@ int parse_market_data(JSON_Value *sim_root_value) {
                         if (price_containers[n].log_price == 0.0) {
                             price_containers[n].log_price = cost;
                         } else {
-                            if (type == 1) {
+                            if (market_order_type == 1) {
                                 if (cost < price_containers[n].log_price || cost > price_containers[n].log_price) {
                                     price_containers[n].log_price = cost;
                                 }
-                            } else if (type == 2) {
+                            } else if (market_order_type == 2) {
                                 if (cost > price_containers[n].log_price) {
                                     price_containers[n].log_price = cost;
                                 }
@@ -187,11 +190,11 @@ int parse_market_data(JSON_Value *sim_root_value) {
                         if (price_containers[n].ore_price == 0.0) {
                             price_containers[n].ore_price = cost;
                         } else {
-                            if (type == 1) {
+                            if (market_order_type == 1) {
                                 if (cost < price_containers[n].ore_price || cost > price_containers[n].ore_price) {
                                     price_containers[n].ore_price = cost;
                                 }
-                            } else if (type == 2) {
+                            } else if (market_order_type == 2) {
                                 if (cost > price_containers[n].ore_price) {
                                     price_containers[n].ore_price = cost;
                                 }
@@ -204,11 +207,11 @@ int parse_market_data(JSON_Value *sim_root_value) {
                         if (price_containers[n].flower_price == 0.0) {
                             price_containers[n].flower_price = cost;
                         } else {
-                            if (type == 1) {
+                            if (market_order_type == 1) {
                                 if (cost < price_containers[n].flower_price || cost > price_containers[n].flower_price) {
                                     price_containers[n].flower_price = cost;
                                 }
-                            } else if (type == 2) {
+                            } else if (market_order_type == 2) {
                                 if (cost > price_containers[n].flower_price) {
                                     price_containers[n].flower_price = cost;
                                 }
@@ -221,11 +224,11 @@ int parse_market_data(JSON_Value *sim_root_value) {
                         if (price_containers[n].fish_price == 0.0) {
                             price_containers[n].fish_price = cost;
                         } else {
-                            if (type == 1) {
+                            if (market_order_type == 1) {
                                 if (cost < price_containers[n].fish_price || cost > price_containers[n].fish_price) {
                                     price_containers[n].fish_price = cost;
                                 }
-                            } else if (type == 2) {
+                            } else if (market_order_type == 2) {
                                 if (cost > price_containers[n].fish_price) {
                                     price_containers[n].fish_price = cost;
                                 }
@@ -235,11 +238,11 @@ int parse_market_data(JSON_Value *sim_root_value) {
                         if (price_containers[n].gemstone_one_price == 0.0) {
                             price_containers[n].gemstone_one_price = cost;
                         } else {
-                            if (type == 1) {
+                            if (market_order_type == 1) {
                                 if (cost < price_containers[n].gemstone_one_price || cost > price_containers[n].gemstone_one_price) {
                                     price_containers[n].gemstone_one_price = cost;
                                 }
-                            } else if (type == 2) {
+                            } else if (market_order_type == 2) {
                                 if (cost > price_containers[n].gemstone_one_price) {
                                     price_containers[n].gemstone_one_price = cost;
                                 }
@@ -249,11 +252,11 @@ int parse_market_data(JSON_Value *sim_root_value) {
                         if (price_containers[n].gemstone_two_price == 0.0) {
                             price_containers[n].gemstone_two_price = cost;
                         } else {
-                            if (type == 1) {
+                            if (market_order_type == 1) {
                                 if (cost < price_containers[n].gemstone_two_price || cost > price_containers[n].gemstone_two_price) {
                                     price_containers[n].gemstone_two_price = cost;
                                 }
-                            } else if (type == 2) {
+                            } else if (market_order_type == 2) {
                                 if (cost > price_containers[n].gemstone_two_price) {
                                     price_containers[n].gemstone_two_price = cost;
                                 }

@@ -99,10 +99,10 @@ int main(int argc, char *argv[]) {
     srand(time(NULL));
 
     if (argc == 1) {
-        printf("Please pass in a file name that exists in the current diectory.\n");
+        printf("Please pass in a file name that exists in the JSON diectory.\n");
         printf("Arg 1 (string): file name containing simulation data");
         printf("Arg 2 (bool) [Default: 1]: Parse market_data.json to fill simulation_values.json");
-        printf("Ex: iw_dun_sim simulation_values.json\n"); 
+        printf("Ex: iw_dun_sim ./json/simulation_values.json\n"); 
     } else if (argc == 2) {
         file_name = argv[1];
     }
@@ -195,8 +195,8 @@ int main(int argc, char *argv[]) {
             }
         }
 
-        printf("-------------------------------\n");
         printf("Usage\n");
+        printf("Level: %.0f\n", json_object_get_number(dungeon, "level"));
         printf("Simulated Hours: "); printf_commas(SIMULATED_HOURS);
         if (SIMULATED_HOURS > 1) {
             printf("Rolls (AVG Hours): "); printf_commas(rolls / SIMULATED_HOURS);
@@ -317,7 +317,7 @@ int main(int argc, char *argv[]) {
                 printf_commas(total_matierals->total_gem_two);
             }
         }
-        printf("-------------------------------\n");
+        printf("|-------------------------------|\n");
 
         free(item_drops);
         free(total_matierals); 
