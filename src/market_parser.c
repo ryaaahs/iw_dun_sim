@@ -1,33 +1,47 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h>
 #include "market_parser.h"
 #include "parson.h"
 
-struct D100PriceContainer {
-    double giant_fang_price;
-    double giant_bone_price;
-    double large_fang_price;
-    double ancient_log_price;
-    double infernal_ore_price;
-    double snapdragon_price;
-    double king_crab_price;
-    double moonstone_price;
-    double onyx_price;
+struct PriceContainer {
+    double key_price;
+    double bone_price;
+    double bone_one_price;
+    double bone_two_price;
+    double log_price;
+    double ore_price;
+    double flower_price;
+    double fish_price;
+    double gemstone_one_price;
+    double gemstone_two_price;
 }; 
 
-int serialize_sim_data(JSON_Value *sim_root_value, struct D100PriceContainer *d100_pc);
+int serialize_sim_data(JSON_Value *sim_root_value, struct PriceContainer *pc);
 
 int parse_market_data(JSON_Value *sim_root_value) {
-    struct D100PriceContainer *d100_pc;
+    struct PriceContainer *price_containers;
+    JSON_Object *game_values;
+    JSON_Array *dungeons;
+    JSON_Object *dungeon;
+    JSON_Array *drops;
+    JSON_Object *drop;
+
     JSON_Value *market_root_value;
     JSON_Object *market_data;
     JSON_Array *listings;
     JSON_Object *listing;
     size_t i;
+    size_t j;
+    size_t n;
+
+    int MARKET_COST_OVERFLOW = 500;
+
     long int id;
     int type;
     double cost;
+    const char *key;
     
     if (access(MARKET_DATA_JSON, F_OK) != 0) {
         fprintf(stderr, "File not found in JSON folder: %s\n", MARKET_DATA_JSON);
@@ -41,7 +55,23 @@ int parse_market_data(JSON_Value *sim_root_value) {
         return -1;
     }
 
-    d100_pc = malloc(sizeof(struct D100PriceContainer));
+    game_values = json_value_get_object(sim_root_value);
+    dungeons = json_object_get_array(game_values, "dungeons");
+    price_containers = malloc(json_array_get_count(dungeons) * sizeof(struct PriceContainer)); 
+
+    for (j = 0; j < json_array_get_count(dungeons); j++) {
+        price_containers[j].key_price = 0.0;
+        price_containers[j].bone_price = 0.0;
+        price_containers[j].bone_one_price = 0.0;
+        price_containers[j].bone_two_price = 0.0;
+        price_containers[j].log_price = 0.0;
+        price_containers[j].ore_price = 0.0;
+        price_containers[j].flower_price = 0.0;
+        price_containers[j].fish_price = 0.0;
+        price_containers[j].gemstone_one_price = 0.0;
+        price_containers[j].gemstone_two_price = 0.0;
+    }
+
     market_data = json_object(market_root_value);
     listings = json_object_get_array(market_data, "listings");
 
@@ -53,97 +83,257 @@ int parse_market_data(JSON_Value *sim_root_value) {
         type = strtol(json_object_get_string(listing, "type"), NULL, 10);
         cost = json_object_get_number(listing, "cost");
 
-        /* TODO: Make this more generic with the other dungeons in the game */
-        switch(id) {
-            case GIANT_FANG: 
-                if((cost < d100_pc->giant_fang_price && type == 1) || (cost > d100_pc->giant_fang_price && type == 2)) {
-                    d100_pc->giant_fang_price = cost;
-                } else if (d100_pc->giant_fang_price == 0) {
-                    d100_pc->giant_fang_price = cost;
+        for (n = 0; n < json_array_get_count(dungeons); n++) {
+            dungeon = json_array_get_object(dungeons, n);
+            drops = json_object_get_array(dungeon, "drops");
+        
+            /* Keys */
+            if (json_object_dotget_number(dungeon, "key.id") == id) {
+                if (price_containers[n].key_price == 0.0) {
+                    price_containers[n].key_price = cost;
+                } else {
+                    if (type == 1) {
+                        if (cost < price_containers[n].key_price || cost > price_containers[n].key_price) {
+                            price_containers[n].key_price = cost;
+                        }
+                    } else if (type == 2) {
+                        if (cost > price_containers[n].key_price) {
+                            price_containers[n].key_price = cost;
+                        }
+                    }
+                } 
+            }
+
+            for (j = 0; j < json_array_get_count(drops); j++) {
+                drop = json_array_get_object(drops, j);
+                key = json_object_get_string(drop, "key");
+
+                if(strcmp(key, "gold") == 0) 
+                    continue;
+                    
+                if (json_object_get_number(drop, "id") == id) {
+                    if (strcmp(key, "bone") == 0) {
+                        if (cost > MARKET_COST_OVERFLOW)
+                            continue;
+
+                        if (price_containers[n].bone_price == 0.0) {
+                            price_containers[n].bone_price = cost;
+                        } else {
+                            if (type == 1) {
+                                if (cost < price_containers[n].bone_price || cost > price_containers[n].bone_price) {
+                                    price_containers[n].bone_price = cost;
+                                }
+                            } else if (type == 2) {
+                                if (cost > price_containers[n].bone_price) {
+                                    price_containers[n].bone_price = cost;
+                                }
+                            }
+                        } 
+                    } else if (strcmp(key, "bone_one") == 0) {
+                        if (cost > MARKET_COST_OVERFLOW)
+                            continue;
+
+                        if (price_containers[n].bone_one_price == 0.0) {
+                            price_containers[n].bone_one_price = cost;
+                        } else {
+                            if (type == 1) {
+                                if (cost < price_containers[n].bone_one_price || cost > price_containers[n].bone_one_price) {
+                                    price_containers[n].bone_one_price = cost;
+                                }
+                            } else if (type == 2) {
+                                if (cost > price_containers[n].bone_one_price) {
+                                    price_containers[n].bone_one_price = cost;
+                                }
+                            }
+                        } 
+                    } else if (strcmp(key, "bone_two") == 0) {
+                        if (cost > MARKET_COST_OVERFLOW)
+                            continue;
+
+                        if (price_containers[n].bone_two_price == 0.0) {
+                            price_containers[n].bone_two_price = cost;
+                        } else {
+                            if (type == 1) {
+                                if (cost < price_containers[n].bone_two_price || cost > price_containers[n].bone_two_price) {
+                                    price_containers[n].bone_two_price = cost;
+                                }
+                            } else if (type == 2) {
+                                if (cost > price_containers[n].bone_two_price) {
+                                    price_containers[n].bone_two_price = cost;
+                                }
+                            }
+                        } 
+                    } else if (strcmp(key, "log") == 0) {
+                        if (cost > MARKET_COST_OVERFLOW)
+                            continue;
+
+                        if (price_containers[n].log_price == 0.0) {
+                            price_containers[n].log_price = cost;
+                        } else {
+                            if (type == 1) {
+                                if (cost < price_containers[n].log_price || cost > price_containers[n].log_price) {
+                                    price_containers[n].log_price = cost;
+                                }
+                            } else if (type == 2) {
+                                if (cost > price_containers[n].log_price) {
+                                    price_containers[n].log_price = cost;
+                                }
+                            }
+                        } 
+                    } else if (strcmp(key, "ore") == 0) {
+                        if (cost > MARKET_COST_OVERFLOW)
+                            continue;
+
+                        if (price_containers[n].ore_price == 0.0) {
+                            price_containers[n].ore_price = cost;
+                        } else {
+                            if (type == 1) {
+                                if (cost < price_containers[n].ore_price || cost > price_containers[n].ore_price) {
+                                    price_containers[n].ore_price = cost;
+                                }
+                            } else if (type == 2) {
+                                if (cost > price_containers[n].ore_price) {
+                                    price_containers[n].ore_price = cost;
+                                }
+                            }
+                        }
+                    } else if (strcmp(key, "flower") == 0) {
+                        if (cost > MARKET_COST_OVERFLOW)
+                            continue;
+
+                        if (price_containers[n].flower_price == 0.0) {
+                            price_containers[n].flower_price = cost;
+                        } else {
+                            if (type == 1) {
+                                if (cost < price_containers[n].flower_price || cost > price_containers[n].flower_price) {
+                                    price_containers[n].flower_price = cost;
+                                }
+                            } else if (type == 2) {
+                                if (cost > price_containers[n].flower_price) {
+                                    price_containers[n].flower_price = cost;
+                                }
+                            }
+                        }
+                    } else if (strcmp(key, "fish") == 0) {
+                        if (cost > MARKET_COST_OVERFLOW)
+                            continue;
+
+                        if (price_containers[n].fish_price == 0.0) {
+                            price_containers[n].fish_price = cost;
+                        } else {
+                            if (type == 1) {
+                                if (cost < price_containers[n].fish_price || cost > price_containers[n].fish_price) {
+                                    price_containers[n].fish_price = cost;
+                                }
+                            } else if (type == 2) {
+                                if (cost > price_containers[n].fish_price) {
+                                    price_containers[n].fish_price = cost;
+                                }
+                            }
+                        }
+                    } else if (strcmp(key, "gemstone_one") == 0) {
+                        if (price_containers[n].gemstone_one_price == 0.0) {
+                            price_containers[n].gemstone_one_price = cost;
+                        } else {
+                            if (type == 1) {
+                                if (cost < price_containers[n].gemstone_one_price || cost > price_containers[n].gemstone_one_price) {
+                                    price_containers[n].gemstone_one_price = cost;
+                                }
+                            } else if (type == 2) {
+                                if (cost > price_containers[n].gemstone_one_price) {
+                                    price_containers[n].gemstone_one_price = cost;
+                                }
+                            }
+                        }
+                    } else if (strcmp(key, "gemstone_two") == 0) {
+                        if (price_containers[n].gemstone_two_price == 0.0) {
+                            price_containers[n].gemstone_two_price = cost;
+                        } else {
+                            if (type == 1) {
+                                if (cost < price_containers[n].gemstone_two_price || cost > price_containers[n].gemstone_two_price) {
+                                    price_containers[n].gemstone_two_price = cost;
+                                }
+                            } else if (type == 2) {
+                                if (cost > price_containers[n].gemstone_two_price) {
+                                    price_containers[n].gemstone_two_price = cost;
+                                }
+                            }
+                        }
+                    }
                 }
-            break;
-            case GIANT_BONE: 
-                if((cost < d100_pc->giant_bone_price && type == 1) || (cost > d100_pc->giant_bone_price && type == 2)) {
-                    d100_pc->giant_bone_price = cost;
-                } else if (d100_pc->giant_bone_price == 0) {
-                    d100_pc->giant_bone_price = cost;
-                }
-            break;
-            case LARGE_FANG: 
-                if((cost < d100_pc->large_fang_price && type == 1) || (cost > d100_pc->large_fang_price && type == 2)) {
-                    d100_pc->large_fang_price = cost;
-                } else if (d100_pc->large_fang_price == 0) {
-                    d100_pc->large_fang_price = cost;
-                }
-            break;
-            case ANCIENT_LOG_ID: 
-                if((cost < d100_pc->ancient_log_price && type == 1) || (cost > d100_pc->ancient_log_price && type == 2)) {
-                    d100_pc->ancient_log_price = cost;
-                } else if (d100_pc->ancient_log_price == 0) {
-                    d100_pc->ancient_log_price = cost;
-                }
-            break;
-            case INFERNAL_ORE_ID: 
-                if((cost < d100_pc->infernal_ore_price && type == 1) || (cost > d100_pc->infernal_ore_price && type == 2)) {
-                    d100_pc->infernal_ore_price = cost;
-                } else if (d100_pc->infernal_ore_price == 0) {
-                    d100_pc->infernal_ore_price = cost;
-                }
-            break;
-            case SNAPDRAGON_ID: 
-                if((cost < d100_pc->snapdragon_price && type == 1) || (cost > d100_pc->snapdragon_price && type == 2)) {
-                    d100_pc->snapdragon_price = cost;
-                } else if (d100_pc->snapdragon_price == 0) {
-                    d100_pc->snapdragon_price = cost;
-                }
-            break;
-            case KING_CRAB_ID: 
-                if((cost < d100_pc->king_crab_price && type == 1) || (cost > d100_pc->king_crab_price && type == 2)) {
-                    d100_pc->king_crab_price = cost;
-                } else if (d100_pc->king_crab_price == 0) {
-                    d100_pc->king_crab_price = cost;
-                }
-            break;
-            case MOONSTONE_ID: 
-                if((cost < d100_pc->moonstone_price && type == 1) || (cost > d100_pc->moonstone_price && type == 2)) {
-                    d100_pc->moonstone_price = cost;
-                } else if (d100_pc->moonstone_price == 0) {
-                    d100_pc->moonstone_price = cost;
-                }
-            break;
-            case ONYX_ID: 
-                if((cost < d100_pc->onyx_price && type == 1) || (cost > d100_pc->onyx_price && type == 2)) {
-                    d100_pc->onyx_price = cost;
-                } else if (d100_pc->onyx_price == 0) {
-                    d100_pc->onyx_price = cost;
-                }
-            break;
+            }
         }        
     }
     
-    if (serialize_sim_data(sim_root_value, d100_pc) == -1) {
+    if (serialize_sim_data(sim_root_value, price_containers) == -1) {
         fprintf(stderr, "%s", "Failure in serialize_sim_data()\n");
         return -1;
     }
 
-    free(d100_pc);
+    free(price_containers);
     json_value_free(market_root_value);
     return 0;
 }
 
-int serialize_sim_data(JSON_Value *sim_root_value, struct D100PriceContainer *d100_pc) {
-    JSON_Object *game_values = json_value_get_object(sim_root_value); 
+int serialize_sim_data(JSON_Value *sim_root_value, struct PriceContainer *price_containers) {
+    JSON_Object *game_values;
+    JSON_Array *dungeons;
+    JSON_Object *dungeon;
+    JSON_Array *drops;
+    JSON_Object *drop;
+    size_t i;
+    size_t j;
+    char buffer [25];
+    const char* key;
+    const char* tag;  
 
-    json_object_dotset_number(game_values, "bones.giant_fang.value", d100_pc->giant_fang_price);
-    json_object_dotset_number(game_values, "bones.giant_bone.value", d100_pc->giant_bone_price);
-    json_object_dotset_number(game_values, "bones.large_fang.value", d100_pc->large_fang_price);
+    game_values = json_value_get_object(sim_root_value); 
+    dungeons = json_object_get_array(game_values, "dungeons");
 
-    json_object_dotset_number(game_values, "logs.ancient_log.value", d100_pc->ancient_log_price);
-    json_object_dotset_number(game_values, "ores.infernal_ore.value", d100_pc->infernal_ore_price);
-    json_object_dotset_number(game_values, "flowers.snapdragon.value", d100_pc->snapdragon_price);
-    json_object_dotset_number(game_values, "fishes.king_crab.value", d100_pc->king_crab_price);
-    json_object_dotset_number(game_values, "gemstones.moonstone.value", d100_pc->moonstone_price);
-    json_object_dotset_number(game_values, "gemstones.onyx.value", d100_pc->onyx_price);
+    for (i = 0; i < json_array_get_count(dungeons); i++) {
+        dungeon = json_array_get_object(dungeons, i);
+        drops = json_object_get_array(dungeon, "drops");
+
+        /* Key */
+        tag = json_object_dotget_string(dungeon, "key.tag");
+        sprintf(buffer, "%s%s%s", "keys.", tag, ".value");
+        json_object_dotset_number(game_values, buffer, price_containers[i].key_price);
+
+        for (j = 0; j < json_array_get_count(drops); j++) {
+            drop = json_array_get_object(drops, j);
+            key = json_object_get_string(drop, "key");
+            tag = json_object_get_string(drop, "tag");
+
+            if (strcmp(key, "bone") == 0) {
+                sprintf(buffer, "%s%s%s", "bones.", tag, ".value");
+                json_object_dotset_number(game_values, buffer, price_containers[i].bone_price);
+            } else if (strcmp(key, "bone_one") == 0) {
+                sprintf(buffer, "%s%s%s", "bones.", tag, ".value");
+                json_object_dotset_number(game_values, buffer, price_containers[i].bone_one_price);
+            } else if (strcmp(key, "bone_two") == 0) {
+                sprintf(buffer, "%s%s%s", "bones.", tag, ".value");
+                json_object_dotset_number(game_values, buffer, price_containers[i].bone_two_price);
+            } else if (strcmp(key, "log") == 0) {
+                sprintf(buffer, "%s%s%s", "logs.", tag, ".value");
+                json_object_dotset_number(game_values, buffer, price_containers[i].log_price);
+            } else if (strcmp(key, "ore") == 0) {
+                sprintf(buffer, "%s%s%s", "ores.", tag, ".value");
+                json_object_dotset_number(game_values, buffer, price_containers[i].ore_price);
+            } else if (strcmp(key, "flower") == 0) {
+                sprintf(buffer, "%s%s%s", "flowers.", tag, ".value");
+                json_object_dotset_number(game_values, buffer, price_containers[i].flower_price);
+            } else if (strcmp(key, "fish") == 0) {
+                sprintf(buffer, "%s%s%s", "fishes.", tag, ".value");
+                json_object_dotset_number(game_values, buffer, price_containers[i].fish_price);
+            } else if (strcmp(key, "gemstone_one") == 0) {
+                sprintf(buffer, "%s%s%s", "gemstones.", tag, ".value");
+                json_object_dotset_number(game_values, buffer, price_containers[i].gemstone_one_price);
+            } else if (strcmp(key, "gemstone_two") == 0) {
+                sprintf(buffer, "%s%s%s", "gemstones.", tag, ".value");
+                json_object_dotset_number(game_values, buffer, price_containers[i].gemstone_two_price);
+            }
+        }
+    }
 
     if (json_serialize_to_file_pretty(sim_root_value, SIMULATION_VALUES_JSON) != JSONSuccess) {
         fprintf(stderr, "Failed to write updated JSON\n");

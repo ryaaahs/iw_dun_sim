@@ -1,17 +1,5 @@
 #include "parson.h"
 
-enum d100_ids {
-    GIANT_FANG          = 411,
-    GIANT_BONE          = 410,
-    LARGE_FANG          = 409,
-    ANCIENT_LOG_ID      = 17,
-    INFERNAL_ORE_ID     = 28,
-    SNAPDRAGON_ID       = 357,
-    KING_CRAB_ID        = 342,
-    MOONSTONE_ID        = 36,
-    ONYX_ID             = 37
-};
-
 #define MARKET_DATA_JSON "./json/market_data.json"
 #define SIMULATION_VALUES_JSON "./json/simulation_values.json"
 
