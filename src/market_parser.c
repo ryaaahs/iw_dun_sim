@@ -286,7 +286,7 @@ int serialize_sim_data(JSON_Value *sim_root_value, struct PriceContainer *price_
     JSON_Object *drop;
     size_t i;
     size_t j;
-    char buffer [25];
+    char buffer[50];
     const char* key;
     const char* tag;  
 
@@ -299,7 +299,7 @@ int serialize_sim_data(JSON_Value *sim_root_value, struct PriceContainer *price_
 
         /* Key */
         tag = json_object_dotget_string(dungeon, "key.tag");
-        sprintf(buffer, "%s%s%s", "keys.", tag, ".value");
+        snprintf(buffer, 50, "%s%s%s", "keys.", tag, ".value");
         json_object_dotset_number(game_values, buffer, price_containers[i].key_price);
 
         for (j = 0; j < json_array_get_count(drops); j++) {
@@ -308,31 +308,31 @@ int serialize_sim_data(JSON_Value *sim_root_value, struct PriceContainer *price_
             tag = json_object_get_string(drop, "tag");
 
             if (strcmp(key, "bone") == 0) {
-                sprintf(buffer, "%s%s%s", "bones.", tag, ".value");
+                snprintf(buffer, 50, "%s%s%s", "bones.", tag, ".value");
                 json_object_dotset_number(game_values, buffer, price_containers[i].bone_price);
             } else if (strcmp(key, "bone_one") == 0) {
-                sprintf(buffer, "%s%s%s", "bones.", tag, ".value");
+                snprintf(buffer, 50, "%s%s%s", "bones.", tag, ".value");
                 json_object_dotset_number(game_values, buffer, price_containers[i].bone_one_price);
             } else if (strcmp(key, "bone_two") == 0) {
-                sprintf(buffer, "%s%s%s", "bones.", tag, ".value");
+                snprintf(buffer, 50, "%s%s%s", "bones.", tag, ".value");
                 json_object_dotset_number(game_values, buffer, price_containers[i].bone_two_price);
             } else if (strcmp(key, "log") == 0) {
-                sprintf(buffer, "%s%s%s", "logs.", tag, ".value");
+                snprintf(buffer, 50, "%s%s%s", "logs.", tag, ".value");
                 json_object_dotset_number(game_values, buffer, price_containers[i].log_price);
             } else if (strcmp(key, "ore") == 0) {
-                sprintf(buffer, "%s%s%s", "ores.", tag, ".value");
+                snprintf(buffer, 50, "%s%s%s", "ores.", tag, ".value");
                 json_object_dotset_number(game_values, buffer, price_containers[i].ore_price);
             } else if (strcmp(key, "flower") == 0) {
-                sprintf(buffer, "%s%s%s", "flowers.", tag, ".value");
+                snprintf(buffer, 50, "%s%s%s", "flowers.", tag, ".value");
                 json_object_dotset_number(game_values, buffer, price_containers[i].flower_price);
             } else if (strcmp(key, "fish") == 0) {
-                sprintf(buffer, "%s%s%s", "fishes.", tag, ".value");
+                snprintf(buffer, 50, "%s%s%s", "fishes.", tag, ".value");
                 json_object_dotset_number(game_values, buffer, price_containers[i].fish_price);
             } else if (strcmp(key, "gemstone_one") == 0) {
-                sprintf(buffer, "%s%s%s", "gemstones.", tag, ".value");
+                snprintf(buffer, 50, "%s%s%s", "gemstones.", tag, ".value");
                 json_object_dotset_number(game_values, buffer, price_containers[i].gemstone_one_price);
             } else if (strcmp(key, "gemstone_two") == 0) {
-                sprintf(buffer, "%s%s%s", "gemstones.", tag, ".value");
+                snprintf(buffer, 50, "%s%s%s", "gemstones.", tag, ".value");
                 json_object_dotset_number(game_values, buffer, price_containers[i].gemstone_two_price);
             }
         }
