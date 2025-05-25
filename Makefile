@@ -3,7 +3,7 @@ CFLAGS := -Wall -Wextra -std=c99 -pedantic -g
 
 SRC_DIR := src
 BUILD_DIR := build
-ARGS := ./json/simulation_values.json
+ARGS := ./json/simulation_values.json 1 0
 
 # Pattern match all the C files within source
 SRCS := $(wildcard $(SRC_DIR)/*.c)

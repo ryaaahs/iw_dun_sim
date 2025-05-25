@@ -68,7 +68,8 @@ struct Item {
 
 int main(int argc, char *argv[]) {
     char* file_name;
-    int parse_market_file = 1;
+    int parse_market_file;
+    int display_type;
 
     JSON_Value *root_value;
     JSON_Object *game_values;
@@ -98,23 +99,37 @@ int main(int argc, char *argv[]) {
 
     srand(time(NULL));
 
-    if (argc == 1) {
-        printf("Please pass in a file name that exists in the JSON diectory.\n");
-        printf("Arg 1 (string): file name containing simulation data");
-        printf("Arg 2 (bool) [Default: 1]: Parse market_data.json to fill simulation_values.json");
-        printf("Ex: iw_dun_sim ./json/simulation_values.json\n"); 
-    } else if (argc == 2) {
-        file_name = argv[1];
-    }
+    if (argc != 4) {
+        printf("NAME\n");
+        printf("\tiw_dun_sim - Dungeon Simulator for IWRPG game\n");
+        printf("SYNOPSIS\n");
+        printf("\tiw_dun_sim [SIM_JSON]... [MARKET_PARSE]... [DISPLAY_TYPE]\n");
+        printf("ARGUMENTS\n");
+        printf("\t[SIM_JSON] - Simulation json file located in your json folder\n");
+        printf("\t[MARKET_PARSE] - Options to filter the market data\n");
+        printf("\t\t[0] - Skip Market Parse\n");
+        printf("\t\t[1] - Lowest sellable value between Sell/Buy\n");
+        printf("\t\t[2] - Only use Sell Order\n");
+        printf("\t\t[3] - Only use Buy Order\n");
+        printf("\t[DISPLAY_TYPE] - What Dungeons do you want to display\n");
+        printf("\t\t[0] - All\n");
+        printf("\t\t[1] - Dungeon 25\n");
+        printf("\t\t[2] - Dungeon 40\n");
+        printf("\t\t[3] - Dungeon 55\n");
+        printf("\t\t[4] - Dungeon 70\n");
+        printf("\t\t[5] - Dungeon 85\n");
+        printf("\t\t[6] - Dungeon 100\n");
 
-    if (argc == 3) {
+        return -1;
+    } else if (argc == 4) {
+        file_name = argv[1];
         parse_market_file = strtol(argv[2], NULL, 10);
     }
     
     /* Get access to the json and confirm the root value is a json type */ 
     root_value = json_parse_file(file_name);
     if (json_value_get_type(root_value) != JSONObject) {
-        fprintf(stderr, "%s", "Incorrect JSON\n");
+        fprintf(stderr, "%s", "Incorrect JSON, expecting JSONObject\n");
         return -1;
     }
 
@@ -129,6 +144,10 @@ int main(int argc, char *argv[]) {
     PLAYER_SAVAGE_CHANCE = json_object_dotget_number(player, "savage_bone_drop_chance");
     PLAYER_ADDITIONAL_COIN_CHANCE = json_object_dotget_number(player, "additional_coins_chance");
 
+    if (parse_market_file != 0) {
+        parse_market_data(root_value, parse_market_file);
+    }
+         
     /* Dungeon loop */
     /*
         if !key_pres
@@ -322,9 +341,6 @@ int main(int argc, char *argv[]) {
         free(item_drops);
         free(total_matierals); 
     }
-
-    if (parse_market_file)
-        parse_market_data(root_value); 
 
     json_value_free(root_value);
     return 0;
