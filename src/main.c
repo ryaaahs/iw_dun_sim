@@ -97,6 +97,8 @@ int main(int argc, char *argv[]) {
     unsigned int total_preserved_keys = 0;
     unsigned int total_double_loot_procs = 0;
 
+    struct MaterialsProduced *total_matierals; 
+
     srand(time(NULL));
 
     if (argc != 4) {
@@ -113,17 +115,18 @@ int main(int argc, char *argv[]) {
         printf("\t\t[3] - Only use Buy Order\n");
         printf("\t[DISPLAY_TYPE] - What Dungeons do you want to display\n");
         printf("\t\t[0] - All\n");
-        printf("\t\t[1] - Dungeon 25\n");
-        printf("\t\t[2] - Dungeon 40\n");
-        printf("\t\t[3] - Dungeon 55\n");
-        printf("\t\t[4] - Dungeon 70\n");
-        printf("\t\t[5] - Dungeon 85\n");
-        printf("\t\t[6] - Dungeon 100\n");
+        printf("\t\t[25] - Dungeon 25\n");
+        printf("\t\t[40] - Dungeon 40\n");
+        printf("\t\t[55] - Dungeon 55\n");
+        printf("\t\t[70] - Dungeon 70\n");
+        printf("\t\t[85] - Dungeon 85\n");
+        printf("\t\t[100] - Dungeon 100\n");
 
         return -1;
     } else if (argc == 4) {
         file_name = argv[1];
         parse_market_file = strtol(argv[2], NULL, 10);
+        display_type = strtol(argv[3], NULL, 10);
     }
     
     /* Get access to the json and confirm the root value is a json type */ 
@@ -143,6 +146,8 @@ int main(int argc, char *argv[]) {
     PLAYER_DOUBLE_LOOT_CHANCE = json_object_dotget_number(player, "double_loot_chance");
     PLAYER_SAVAGE_CHANCE = json_object_dotget_number(player, "savage_bone_drop_chance");
     PLAYER_ADDITIONAL_COIN_CHANCE = json_object_dotget_number(player, "additional_coins_chance");
+
+    total_matierals = malloc(sizeof(struct MaterialsProduced));
 
     if (parse_market_file != 0) {
         parse_market_data(root_value, parse_market_file);
@@ -166,12 +171,17 @@ int main(int argc, char *argv[]) {
                 loot
     */
     for (i = 0; i < json_array_get_count(dungeons); i++) {
-        struct MaterialsProduced *total_matierals; 
         struct Item *item_drops;
 
         dungeon = json_array_get_object(dungeons, i);
         drops = json_object_get_array(dungeon, "drops");
         item_drops = malloc(json_array_get_count(drops) * sizeof(struct Item)); 
+        rolls = 0;
+
+        if (display_type != 0) {
+            if (json_object_get_number(dungeon, "level") != display_type)
+                continue;
+        }
 
         for (j = 0; j < json_array_get_count(drops); j++) {
             drop = json_array_get_object(drops, j);
@@ -182,8 +192,6 @@ int main(int argc, char *argv[]) {
             item_drops[j].max = json_object_get_number(drop, "max");
             item_drops[j].rate = json_object_get_number(drop, "rate");
         }
-
-        total_matierals = malloc(sizeof(struct MaterialsProduced));
 
         KEYS_PER_HOUR = json_object_dotget_number(dungeon, "monsters_hour") / 3;
         FOOD_PER_HOUR = json_object_get_number(dungeon, "food");
@@ -281,6 +289,7 @@ int main(int argc, char *argv[]) {
                 }
             }
         }
+        
         if (SIMULATED_HOURS > 1) {
             printf("Loot (AVG Hours)\n");
             for (j = 0; j < json_array_get_count(drops); j++) {
@@ -337,11 +346,11 @@ int main(int argc, char *argv[]) {
             }
         }
         printf("|-------------------------------|\n");
-
+        
         free(item_drops);
-        free(total_matierals); 
     }
 
+    free(total_matierals); 
     json_value_free(root_value);
     return 0;
 }
