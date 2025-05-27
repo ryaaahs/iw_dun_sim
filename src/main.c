@@ -7,56 +7,6 @@
 #include "parson.h"
 #include "market_parser.h"
 
-double rand_zero_one() {
-    return (double)rand() / RAND_MAX;
-}
-
-int rand_number_range(int min, int max) {
-    return rand() % (max + 1 - min) + min;
-}
-
-/* https://stackoverflow.com/a/1449859 */
-void printf_commas(int value) {
-    int value_container = 0;
-    int scale = 1;
-    
-    /* Print a negative sign and flip the value to positive for remaining calulcation */
-    if (value < 0) {
-        printf ("-");
-        value = -value;
-    }
-
-    /* Scale the value down to the lowest denomination and print it */
-    while (value >= 1000) {
-        value_container = value_container + scale * (value % 1000);
-        value /= 1000;
-        scale *= 1000;
-    }
-    printf ("%d", value);
-
-    /* Work our way back up using the value container and scale. */
-    while (scale != 1) {
-        scale /= 1000;
-        value = value_container / scale;
-        value_container = value_container % scale;
-        printf (",%03d", value);
-    }
-    printf("\n");
-}
-
-struct MaterialsProduced {
-    long int total_gold;
-    long int total_bone;
-    long int total_bone_one;
-    long int total_bone_two;
-    long int total_logs;
-    long int total_ores;
-    long int total_flowers;
-    long int total_fishes;
-    long int total_gem_one;
-    long int total_gem_two;
-};
-
 struct Item {
     const char* name;
     const char* tag;
@@ -64,7 +14,18 @@ struct Item {
     int min;
     int max;
     float rate;
+    long int amount;
+    long int value;
 };
+
+double rand_zero_one();
+
+int rand_number_range(int min, int max);
+
+int assign_market_values(JSON_Object *game_values, struct Item *item_drops, size_t drops_length);
+
+/* https://stackoverflow.com/a/1449859 */
+void printf_commas(int value);
 
 int main(int argc, char *argv[]) {
     char* file_name;
@@ -93,11 +54,11 @@ int main(int argc, char *argv[]) {
     unsigned int FOOD_PER_HOUR;
 
     unsigned int rolls = 0;
+    unsigned int banked_bone_one = 0;
+    unsigned int banked_bone_two = 0;
     unsigned int total_keys_used = 0;
     unsigned int total_preserved_keys = 0;
     unsigned int total_double_loot_procs = 0;
-
-    struct MaterialsProduced *total_matierals; 
 
     srand(time(NULL));
 
@@ -147,8 +108,6 @@ int main(int argc, char *argv[]) {
     PLAYER_SAVAGE_CHANCE = json_object_dotget_number(player, "savage_bone_drop_chance");
     PLAYER_ADDITIONAL_COIN_CHANCE = json_object_dotget_number(player, "additional_coins_chance");
 
-    total_matierals = malloc(sizeof(struct MaterialsProduced));
-
     if (parse_market_file != 0) {
         parse_market_data(root_value, parse_market_file);
     }
@@ -177,6 +136,8 @@ int main(int argc, char *argv[]) {
         drops = json_object_get_array(dungeon, "drops");
         item_drops = malloc(json_array_get_count(drops) * sizeof(struct Item)); 
         rolls = 0;
+        banked_bone_one = 0;
+        banked_bone_two = 0;
 
         if (display_type != 0) {
             if (json_object_get_number(dungeon, "level") != display_type)
@@ -191,21 +152,12 @@ int main(int argc, char *argv[]) {
             item_drops[j].min = json_object_get_number(drop, "min");
             item_drops[j].max = json_object_get_number(drop, "max");
             item_drops[j].rate = json_object_get_number(drop, "rate");
+            item_drops[j].amount = 0;
+            item_drops[j].value = 0;
         }
 
         KEYS_PER_HOUR = json_object_dotget_number(dungeon, "monsters_hour") / 3;
         FOOD_PER_HOUR = json_object_get_number(dungeon, "food");
-
-        total_matierals->total_gold = 0;
-        total_matierals->total_bone = 0;
-        total_matierals->total_bone_one = 0;
-        total_matierals->total_bone_two = 0;
-        total_matierals->total_logs = 0;
-        total_matierals->total_ores = 0;
-        total_matierals->total_flowers = 0;
-        total_matierals->total_fishes = 0;
-        total_matierals->total_gem_one = 0;
-        total_matierals->total_gem_two = 0;
 
         /* Get loot rolls */
         for (j = 0; j < (SIMULATED_HOURS * KEYS_PER_HOUR); j++) {
@@ -222,16 +174,17 @@ int main(int argc, char *argv[]) {
             }
         }
 
+        printf("|-------------------------------|\n");
         printf("Usage\n");
-        printf("Level: %.0f\n", json_object_get_number(dungeon, "level"));
-        printf("Simulated Hours: "); printf_commas(SIMULATED_HOURS);
+        printf("\tLevel: %.0f\n", json_object_get_number(dungeon, "level"));
+        printf("\tSimulated Hours: "); printf_commas(SIMULATED_HOURS);
         if (SIMULATED_HOURS > 1) {
-            printf("Rolls (AVG Hours): "); printf_commas(rolls / SIMULATED_HOURS);
+            printf("\tRolls (AVG Hours): "); printf_commas(rolls / SIMULATED_HOURS);
         } 
-        printf("Rolls: "); printf_commas(rolls);
-        printf("Double Loot Procs: ");  printf_commas(total_double_loot_procs);
-        printf("Total Keys: "); printf_commas((SIMULATED_HOURS * KEYS_PER_HOUR));
-        printf("Total Keys Preserved: "); printf_commas(total_preserved_keys);
+        printf("\tRolls: "); printf_commas(rolls);
+        printf("\tDouble Loot Procs: ");  printf_commas(total_double_loot_procs);
+        printf("\tTotal Keys: "); printf_commas((SIMULATED_HOURS * KEYS_PER_HOUR));
+        printf("\tTotal Keys Preserved: "); printf_commas(total_preserved_keys);
         printf("-------------------------------\n");
 
         /* Run rolls aganist loot rates */ 
@@ -241,116 +194,167 @@ int main(int argc, char *argv[]) {
                     if (PLAYER_SAVAGE_CHANCE >= rand_zero_one()) {
                         for (n = 0; n < 2; n++) {
                             if(rand_number_range(0,1)) {
-                                total_matierals->total_bone_one++;
+                                banked_bone_one++;
                             } else {
-                                total_matierals->total_bone_two++;
+                                banked_bone_two++;
                             }
                         }
                     } else {
-                        total_matierals->total_bone++;
+                        item_drops[k].amount += 1;
                     }
-                } else if (strcmp(item_drops[k].key, "bone_one") == 0 || strcmp(item_drops[k].key, "bone_two") == 0) {
-                    continue;
+                } else if (strcmp(item_drops[k].key, "bone_one") == 0) {
+                    item_drops[k].amount += banked_bone_one;
+                    banked_bone_one = 0;
+                } else if (strcmp(item_drops[k].key, "bone_two") == 0) {
+                    item_drops[k].amount += banked_bone_two;
+                    banked_bone_two = 0;
                 } else if (strcmp(item_drops[k].key, "gold") == 0) {
                     if (item_drops[k].rate >= rand_zero_one()) {
-                        total_matierals->total_gold += rand_number_range(item_drops[k].min, item_drops[k].max);
+                        item_drops[k].amount += rand_number_range(item_drops[k].min, item_drops[k].max); 
         
                         if (PLAYER_ADDITIONAL_COIN_CHANCE > 0 && PLAYER_ADDITIONAL_COIN_CHANCE >= rand_zero_one()) {
-                            total_matierals->total_gold += rand_number_range(item_drops[k].min, item_drops[k].max);
+                            item_drops[k].amount += rand_number_range(item_drops[k].min, item_drops[k].max); 
                         }
                     }
                 } else {
                     /* Materials */
                     if (strcmp(item_drops[k].key, "log") == 0) {
                         if (item_drops[k].rate >= rand_zero_one()) {
-                            total_matierals->total_logs += rand_number_range(item_drops[k].min, item_drops[k].max);
+                            item_drops[k].amount += rand_number_range(item_drops[k].min, item_drops[k].max); 
                         }
                     } else if (strcmp(item_drops[k].key, "ore") == 0) {
                         if (item_drops[k].rate >= rand_zero_one()) {
-                            total_matierals->total_ores += rand_number_range(item_drops[k].min, item_drops[k].max);
+                            item_drops[k].amount += rand_number_range(item_drops[k].min, item_drops[k].max); 
                         }
                     } else if (strcmp(item_drops[k].key, "flower") == 0) {
                         if (item_drops[k].rate >= rand_zero_one()) {
-                            total_matierals->total_flowers += rand_number_range(item_drops[k].min, item_drops[k].max);
+                            item_drops[k].amount += rand_number_range(item_drops[k].min, item_drops[k].max); 
                         }
                     } else if (strcmp(item_drops[k].key, "fish") == 0) {
                         if (item_drops[k].rate >= rand_zero_one()) {
-                            total_matierals->total_fishes += rand_number_range(item_drops[k].min, item_drops[k].max);
+                            item_drops[k].amount += rand_number_range(item_drops[k].min, item_drops[k].max); 
                         }
                     } else if (strcmp(item_drops[k].key, "gemstone_one") == 0) {
                         if (item_drops[k].rate >= rand_zero_one()) {
-                            total_matierals->total_gem_one += rand_number_range(item_drops[k].min, item_drops[k].max);
+                            item_drops[k].amount += rand_number_range(item_drops[k].min, item_drops[k].max); 
                         }
                     } else if (strcmp(item_drops[k].key, "gemstone_two") == 0) {
                         if (item_drops[k].rate >= rand_zero_one()) {
-                            total_matierals->total_gem_two += rand_number_range(item_drops[k].min, item_drops[k].max);
+                            item_drops[k].amount += rand_number_range(item_drops[k].min, item_drops[k].max); 
                         }
                     }
                 }
             }
         }
         
+        assign_market_values(game_values, item_drops, json_array_get_count(drops)); 
+
         if (SIMULATED_HOURS > 1) {
             printf("Loot (AVG Hours)\n");
             for (j = 0; j < json_array_get_count(drops); j++) {
-                printf("%s: ", item_drops[j].name); 
+                printf("\t%s: ", item_drops[j].name); 
 
                 if (strcmp(item_drops[j].key, "gold") == 0) {
-                    printf_commas(total_matierals->total_gold / SIMULATED_HOURS);
-                } else if (strcmp(item_drops[j].key, "bone") == 0) {
-                    printf_commas(total_matierals->total_bone / SIMULATED_HOURS);
-                } else if (strcmp(item_drops[j].key, "bone_one") == 0) {
-                    printf_commas(total_matierals->total_bone_one / SIMULATED_HOURS);
-                } else if (strcmp(item_drops[j].key, "bone_two") == 0) {
-                    printf_commas(total_matierals->total_bone_two / SIMULATED_HOURS);
-                } else if (strcmp(item_drops[j].key, "log") == 0) {
-                    printf_commas(total_matierals->total_logs / SIMULATED_HOURS);
-                } else if (strcmp(item_drops[j].key, "ore") == 0) {
-                    printf_commas(total_matierals->total_ores / SIMULATED_HOURS);
-                } else if (strcmp(item_drops[j].key, "flower") == 0) {
-                    printf_commas(total_matierals->total_flowers / SIMULATED_HOURS);
-                } else if (strcmp(item_drops[j].key, "fish") == 0) {
-                    printf_commas(total_matierals->total_fishes / SIMULATED_HOURS);
-                } else if (strcmp(item_drops[j].key, "gemstone_one") == 0) {
-                    printf_commas(total_matierals->total_gem_one / SIMULATED_HOURS);
-                } else if (strcmp(item_drops[j].key, "gemstone_two") == 0) {
-                    printf_commas(total_matierals->total_gem_two / SIMULATED_HOURS);
+                    printf_commas(item_drops[j].amount / SIMULATED_HOURS);
+                    printf("\t-------\n");
+                } else {
+                    printf_commas(item_drops[j].amount / SIMULATED_HOURS);
+                    printf("\t%s Value: ", item_drops[j].name); 
+                    printf_commas((item_drops[j].value * item_drops[j].amount) / SIMULATED_HOURS);
+                    printf("\t-------\n");
                 }
             }
             printf("-------------------------------\n");
         }
 
+        printf("Loot (Total)\n");
         for (j = 0; j < json_array_get_count(drops); j++) {
-            printf("%s: ", item_drops[j].name); 
+            printf("\t%s: ", item_drops[j].name); 
 
             if (strcmp(item_drops[j].key, "gold") == 0) {
-                printf_commas(total_matierals->total_gold);
-            } else if (strcmp(item_drops[j].key, "bone") == 0) {
-                printf_commas(total_matierals->total_bone);
-            } else if (strcmp(item_drops[j].key, "bone_one") == 0) {
-                printf_commas(total_matierals->total_bone_one);
-            } else if (strcmp(item_drops[j].key, "bone_two") == 0) {
-                printf_commas(total_matierals->total_bone_two);
-            } else if (strcmp(item_drops[j].key, "log") == 0) {
-                printf_commas(total_matierals->total_logs);
-            } else if (strcmp(item_drops[j].key, "ore") == 0) {
-                printf_commas(total_matierals->total_ores);
-            } else if (strcmp(item_drops[j].key, "flower") == 0) {
-                printf_commas(total_matierals->total_flowers);
-            } else if (strcmp(item_drops[j].key, "fish") == 0) {
-                printf_commas(total_matierals->total_fishes);
-            } else if (strcmp(item_drops[j].key, "gemstone_one") == 0) {
-                printf_commas(total_matierals->total_gem_one);
-            } else if (strcmp(item_drops[j].key, "gemstone_two") == 0) {
-                printf_commas(total_matierals->total_gem_two);
+                printf_commas(item_drops[j].amount);
+                printf("\t-------\n");
+            } else {
+                printf_commas(item_drops[j].amount);
+                printf("\t%s Value: ", item_drops[j].name); 
+                printf_commas((item_drops[j].value * item_drops[j].amount));
+                printf("\t-------\n");
             }
         }
-        printf("|-------------------------------|\n");
         
         free(item_drops);
     }
 
-    free(total_matierals); 
     json_value_free(root_value);
+    return 0;
+}
+
+double rand_zero_one() {
+    return (double)rand() / RAND_MAX;
+}
+
+int rand_number_range(int min, int max) {
+    return rand() % (max + 1 - min) + min;
+}
+
+void printf_commas(int value) {
+    int value_container = 0;
+    int scale = 1;
+    
+    /* Print a negative sign and flip the value to positive for remaining calulcation */
+    if (value < 0) {
+        printf ("\t-");
+        value = -value;
+    }
+
+    /* Scale the value down to the lowest denomination and print it */
+    while (value >= 1000) {
+        value_container = value_container + scale * (value % 1000);
+        value /= 1000;
+        scale *= 1000;
+    }
+    printf ("%d", value);
+
+    /* Work our way back up using the value container and scale. */
+    while (scale != 1) {
+        scale /= 1000;
+        value = value_container / scale;
+        value_container = value_container % scale;
+        printf (",%03d", value);
+    }
+    printf("\n");
+}
+
+int assign_market_values(JSON_Object *game_values, struct Item *item_drops, size_t drops_length) {
+    char buffer[50];
+    size_t j;
+
+    for (j = 0; j < drops_length; j++) {
+        if (strcmp(item_drops[j].key, "bone") == 0 || strcmp(item_drops[j].key, "bone_one") == 0 || strcmp(item_drops[j].key, "bone_two") == 0) {
+            snprintf(buffer, 50, "%s%s%s", "bones.", item_drops[j].tag, ".value");
+            item_drops[j].value = json_object_dotget_number(game_values, buffer);
+
+        } else if (strcmp(item_drops[j].key, "log") == 0) {
+            snprintf(buffer, 50, "%s%s%s", "logs.", item_drops[j].tag, ".value");
+            item_drops[j].value = json_object_dotget_number(game_values, buffer);
+
+        } else if (strcmp(item_drops[j].key, "ore") == 0) {
+            snprintf(buffer, 50, "%s%s%s", "ores.", item_drops[j].tag, ".value");
+            item_drops[j].value = json_object_dotget_number(game_values, buffer);
+
+        } else if (strcmp(item_drops[j].key, "flower") == 0) {
+            snprintf(buffer, 50, "%s%s%s", "flowers.", item_drops[j].tag, ".value");
+            item_drops[j].value = json_object_dotget_number(game_values, buffer);
+
+        } else if (strcmp(item_drops[j].key, "fish") == 0) {
+            snprintf(buffer, 50, "%s%s%s", "fishes.", item_drops[j].tag, ".value");
+            item_drops[j].value = json_object_dotget_number(game_values, buffer);
+
+        } else if (strcmp(item_drops[j].key, "gemstone_one") == 0 || strcmp(item_drops[j].key, "gemstone_two") == 0) {
+            snprintf(buffer, 50, "%s%s%s", "gemstones.", item_drops[j].tag, ".value");
+            item_drops[j].value = json_object_dotget_number(game_values, buffer);
+        } 
+    }
+
     return 0;
 }

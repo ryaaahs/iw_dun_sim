@@ -20,7 +20,7 @@ struct PriceContainer {
 
 int serialize_sim_data(JSON_Value *sim_root_value, struct PriceContainer *price_containers);
 
-int reset_sim_data(JSON_Value *sim_root_value) ;
+int reset_sim_data(JSON_Value *sim_root_value);
 
 int parse_market_data(JSON_Value *sim_root_value, int market_parse_type) {
     struct PriceContainer *price_containers;
