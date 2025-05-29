@@ -25,7 +25,7 @@ int rand_number_range(int min, int max);
 int assign_market_values(JSON_Object *game_values, struct Item *item_drops, size_t drops_length);
 
 /* https://stackoverflow.com/a/1449859 */
-void printf_commas(int value);
+void printf_commas(int value, size_t padding);
 
 int main(int argc, char *argv[]) {
     char* file_name;
@@ -176,16 +176,25 @@ int main(int argc, char *argv[]) {
 
         printf("|-------------------------------|\n");
         printf("Usage\n");
-        printf("\tLevel: %.0f\n", json_object_get_number(dungeon, "level"));
-        printf("\tSimulated Hours: "); printf_commas(SIMULATED_HOURS);
+        printf("\t%-25s %s\n", "Key", "Value");
+        printf("\t%-25s %s\n", "-----", "-----");
+        printf("\t%-25s %0.f\n", "Level", json_object_get_number(dungeon, "level"));
+        printf("\t%-25s ", "Simulated Hours"); printf_commas(SIMULATED_HOURS, 0);
+        printf("\n");
+
         if (SIMULATED_HOURS > 1) {
-            printf("\tRolls (AVG Hours): "); printf_commas(rolls / SIMULATED_HOURS);
+            printf("\t%-25s ", "Rolls (AVG Hours)"); printf_commas(rolls / SIMULATED_HOURS, 0);
+            printf("\n");
         } 
-        printf("\tRolls: "); printf_commas(rolls);
-        printf("\tDouble Loot Procs: ");  printf_commas(total_double_loot_procs);
-        printf("\tTotal Keys: "); printf_commas((SIMULATED_HOURS * KEYS_PER_HOUR));
-        printf("\tTotal Keys Preserved: "); printf_commas(total_preserved_keys);
-        printf("-------------------------------\n");
+
+        printf("\t%-25s ", "Rolls"); printf_commas(rolls, 0);
+        printf("\n");
+        printf("\t%-25s ", "Double Loot Procs"); printf_commas(total_double_loot_procs, 0);
+        printf("\n");
+        printf("\t%-25s ", "Total Keys"); printf_commas((SIMULATED_HOURS * KEYS_PER_HOUR), 0);
+        printf("\n");
+        printf("\t%-25s ", "Total Keys Preserved"); printf_commas(total_preserved_keys, 0);
+        printf("\n-------------------------------\n");
 
         /* Run rolls aganist loot rates */ 
         for (j = 0; j < rolls; j++) {
@@ -251,39 +260,45 @@ int main(int argc, char *argv[]) {
 
         if (SIMULATED_HOURS > 1) {
             printf("Loot (AVG Hours)\n");
+            printf("\t%-25s %-15s %s\n", "Item", "Amount", "Gold Per Hour");
+            printf("\t%-25s %-15s %s\n", "-----", "-----", "----------");
             for (j = 0; j < json_array_get_count(drops); j++) {
-                printf("\t%s: ", item_drops[j].name); 
+                printf("\t%-25s ", item_drops[j].name); 
 
                 if (strcmp(item_drops[j].key, "gold") == 0) {
-                    printf_commas(item_drops[j].amount / SIMULATED_HOURS);
-                    printf("\t-------\n");
+                    printf("%-15d ", 1); 
+                    printf_commas(item_drops[j].amount / SIMULATED_HOURS, 0);
+                    printf(" / hour\n");
                 } else {
-                    printf_commas(item_drops[j].amount / SIMULATED_HOURS);
-                    printf("\t%s Value: ", item_drops[j].name); 
-                    printf_commas((item_drops[j].value * item_drops[j].amount) / SIMULATED_HOURS);
-                    printf("\t-------\n");
+                    printf_commas(item_drops[j].amount / SIMULATED_HOURS, 15);
+                    printf_commas((item_drops[j].value * item_drops[j].amount) / SIMULATED_HOURS, 0);
+                    printf(" / hour\n");
                 }
             }
             printf("-------------------------------\n");
         }
 
         printf("Loot (Total)\n");
+        printf("\t%-25s %-15s %s\n", "Item", "Amount", "Gold Per Hour");
+        printf("\t%-25s %-15s %s\n", "-----", "-----", "----------");
         for (j = 0; j < json_array_get_count(drops); j++) {
-            printf("\t%s: ", item_drops[j].name); 
+            printf("\t%-25s ", item_drops[j].name); 
 
             if (strcmp(item_drops[j].key, "gold") == 0) {
-                printf_commas(item_drops[j].amount);
-                printf("\t-------\n");
+                printf("%-15d ", 1); 
+                printf_commas(item_drops[j].amount / SIMULATED_HOURS, 0);
+                printf(" / hour\n");
             } else {
-                printf_commas(item_drops[j].amount);
-                printf("\t%s Value: ", item_drops[j].name); 
-                printf_commas((item_drops[j].value * item_drops[j].amount));
-                printf("\t-------\n");
+                printf_commas(item_drops[j].amount, 15);
+                printf_commas((item_drops[j].value * item_drops[j].amount), 0);
+                printf(" / hour\n");
             }
         }
         
         free(item_drops);
     }
+
+    printf("-------------------------------\n");
 
     json_value_free(root_value);
     return 0;
@@ -297,14 +312,17 @@ int rand_number_range(int min, int max) {
     return rand() % (max + 1 - min) + min;
 }
 
-void printf_commas(int value) {
+void printf_commas(int value, size_t padding) {
     int value_container = 0;
     int scale = 1;
+    size_t counter = 0;
+    size_t i;
     
     /* Print a negative sign and flip the value to positive for remaining calulcation */
     if (value < 0) {
-        printf ("\t-");
+        printf ("-");
         value = -value;
+        counter++;
     }
 
     /* Scale the value down to the lowest denomination and print it */
@@ -312,6 +330,14 @@ void printf_commas(int value) {
         value_container = value_container + scale * (value % 1000);
         value /= 1000;
         scale *= 1000;
+    }
+
+    if (value < 10) {
+        counter++;
+    } else if (value < 100) {
+        counter += 2;
+    } else {
+        counter += 3;
     }
     printf ("%d", value);
 
@@ -321,8 +347,14 @@ void printf_commas(int value) {
         value = value_container / scale;
         value_container = value_container % scale;
         printf (",%03d", value);
+        counter += 4;
     }
-    printf("\n");
+    
+    if (counter < padding) {
+        for (i = 0; i <= padding - counter; i++) {
+            printf(" ");
+        }
+    }
 }
 
 int assign_market_values(JSON_Object *game_values, struct Item *item_drops, size_t drops_length) {
