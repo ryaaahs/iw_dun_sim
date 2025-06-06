@@ -169,6 +169,7 @@ int main(int argc, char *argv[]) {
         banked_bone_one = 0;
         banked_bone_two = 0;
         total_gold_value = 0;
+        total_preserved_keys = 0;
 
         if (display_type != 0) {
             if (json_object_get_number(dungeon, "level") != display_type)
@@ -317,13 +318,17 @@ int main(int argc, char *argv[]) {
                     printf("%-15d ", 1); 
                     printf_commas(item_drops[j].amount / SIMULATED_HOURS, 0);
                     printf(" / hour\n");
+                    total_gold_value += item_drops[j].amount;
                 } else {
                     printf_commas(item_drops[j].amount / SIMULATED_HOURS, 15);
                     printf_commas((item_drops[j].value * item_drops[j].amount) / SIMULATED_HOURS, 0);
                     printf(" / hour\n");
+                    total_gold_value += item_drops[j].value * item_drops[j].amount;
                 }
             }
 
+            printf("Total Gold (AVG Hours): "); printf_commas(total_gold_value / SIMULATED_HOURS, 0);
+            printf("\n");
             printf("--------------------------------------------------------------\n");
         }
 
@@ -337,15 +342,14 @@ int main(int argc, char *argv[]) {
                 printf_commas(item_drops[j].amount, 15);
                 printf_commas(item_drops[j].amount, 0);
                 printf(" coins\n");
-                total_gold_value += item_drops[j].amount;
             } else {
                 printf_commas(item_drops[j].amount, 15);
                 printf_commas((item_drops[j].value * item_drops[j].amount), 0);
-                printf(" coins\n");
-                total_gold_value += item_drops[j].value * item_drops[j].amount;
+                printf(" coins\n"); 
             }
         }
-
+        printf("Total Gold: "); printf_commas(total_gold_value, 0);
+        printf("\n");
         printf("|--------------------------------------------------------------|\n");
         printf("Profits\n");
         printf("Gold/hour (Produced): "); printf_commas(total_gold_value / SIMULATED_HOURS, 0);
