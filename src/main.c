@@ -45,6 +45,7 @@ int main(int argc, char *argv[]) {
     size_t k;
     size_t n;
 
+    const unsigned int MONSTERS_PER_KEY = 6;
     unsigned int SIMULATED_HOURS;
     float PLAYER_KEY_PRESERVE;
     float PLAYER_DOUBLE_LOOT_CHANCE;
@@ -158,12 +159,12 @@ int main(int argc, char *argv[]) {
             item_drops[j].value = 0;
         }
 
-        KEYS_PER_HOUR = json_object_dotget_number(dungeon, "monsters_hour") / 3;
+        KEYS_PER_HOUR = json_object_dotget_number(dungeon, "monsters_hour") / MONSTERS_PER_KEY;
         FOOD_PER_HOUR = json_object_get_number(dungeon, "food");
 
         /* Get loot rolls */
         for (j = 0; j < (SIMULATED_HOURS * KEYS_PER_HOUR); j++) {
-            rolls += 3;
+            rolls += MONSTERS_PER_KEY;
             total_keys_used++;
 
             if (PLAYER_KEY_PRESERVE > 0 && PLAYER_KEY_PRESERVE >= rand_zero_one()) { 
@@ -171,7 +172,7 @@ int main(int argc, char *argv[]) {
             }
 
             if (PLAYER_DOUBLE_LOOT_CHANCE >= rand_zero_one()) {
-                rolls += 3; 
+                rolls += MONSTERS_PER_KEY; 
                 total_double_loot_procs++;
             }
         }
@@ -282,20 +283,20 @@ int main(int argc, char *argv[]) {
         }
 
         printf("Loot (Total)\n");
-        printf("\t%-25s %-15s %s\n", "Item", "Amount", "Gold Per Hour");
+        printf("\t%-25s %-15s %s\n", "Item", "Amount", "Gold");
         printf("\t%-25s %-15s %s\n", "-----", "-----", "----------");
         for (j = 0; j < json_array_get_count(drops); j++) {
             printf("\t%-25s ", item_drops[j].name); 
 
             if (strcmp(item_drops[j].key, "gold") == 0) {
                 printf_commas(item_drops[j].amount, 15);
-                printf_commas(item_drops[j].amount / SIMULATED_HOURS, 0);
-                printf(" / hour\n");
+                printf_commas(item_drops[j].amount, 0);
+                printf(" coins\n");
                 total_gold_value += item_drops[j].amount;
             } else {
                 printf_commas(item_drops[j].amount, 15);
                 printf_commas((item_drops[j].value * item_drops[j].amount), 0);
-                printf(" / hour\n");
+                printf(" coins\n");
                 total_gold_value += item_drops[j].value * item_drops[j].amount;
             }
         }
