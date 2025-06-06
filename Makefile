@@ -3,7 +3,10 @@ CFLAGS := -Wall -Wextra -std=c99 -pedantic -g
 
 SRC_DIR := src
 BUILD_DIR := build
-ARGS := ./json/simulation_values.json 1 0
+SIM_JSON := ./json/simulation_values.json
+# Default values for arugments
+MARKET_PARSE := 1
+DISPLAY_TYPE := 100
 
 # Pattern match all the C files within source
 SRCS := $(wildcard $(SRC_DIR)/*.c)
@@ -33,4 +36,4 @@ clean:
 	rm -rf $(BUILD_DIR)
 
 run: 
-	$(TARGET) $(ARGS)
+	$(TARGET) $(SIM_JSON) $(MARKET_PARSE) $(DISPLAY_TYPE)
