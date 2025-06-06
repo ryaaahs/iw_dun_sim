@@ -43,51 +43,46 @@ ARGUMENTS
 		[85] - Dungeon 85
 		[100] - Dungeon 100
 
-./build/iw_dun_sim ./json/simulation_values.json 1 100
-|-------------------------------|
+make run MARKET_PARSE=1 DISPLAY_TYPE=100
+build/iw_dun_sim ./json/simulation_values.json 1 100
+|--------------------------------------------------------------|
 Usage
 	Key                       Value
 	-----                     -----
 	Level                     100
-	Simulated Hours           24
-	Rolls (AVG Hours)         457
-	Rolls                     10,983
-	Double Loot Procs         997
-	Total Keys                2,664
-	Total Keys Preserved      170
--------------------------------
-Loot (AVG Hours)
-	Item                      Amount          Gold Per Hour
-	-----                     -----           ----------
-	Gold                      1               240,889 / hour
-	Giant Fang                383             47,937 / hour
-	Giant Bone                75              8,175 / hour
-	Large Fang                73              10,108 / hour
-	Ancient Log               100             10,949 / hour
-	Infernal Ore              95              8,142 / hour
-	Snapdragon                94              9,289 / hour
-	King Crab                 97              9,775 / hour
-	Moonstone                 2               2,345 / hour
-	Onyx                      3               3,560 / hour
--------------------------------
+	Simulated Hours           1
+	Rolls                     498
+	Double Loot Procs         27
+	Total Keys                56
+	Total Keys Preserved      4
+|--------------------------------------------------------------|
+Consumed
+	Item                      Value
+	-----                     -----
+	Pie                       87,360 / hour
+	Potion                    37,044 / hour
+	Sigil                     2,912 / hour
+	Keys                      87,880 / hour
+|--------------------------------------------------------------|
 Loot (Total)
-	Item                      Amount          Gold Per Hour
+	Item                      Amount          Gold
 	-----                     -----           ----------
-	Gold                      5,781,339       240,889 / hour
-	Giant Fang                9,204           1,150,500 / hour
-	Giant Bone                1,800           196,200 / hour
-	Large Fang                1,758           242,604 / hour
-	Ancient Log               2,411           262,799 / hour
-	Infernal Ore              2,299           195,415 / hour
-	Snapdragon                2,275           222,950 / hour
-	King Crab                 2,346           234,600 / hour
-	Moonstone                 67              56,280 / hour
-	Onyx                      89              85,440 / hour
--------------------------------
-// Placeholder - Will need to updated
-Gold/hour (Produced): 351,171
-Gold/hour (Equipment): 351,171
-Gold/hour (Total): 351,171
--------------------------------
+	Gold                      165,102         165,102 coins
+	Giant Fang                424             39,856 coins
+	Giant Bone                66              5,742 coins
+	Large Fang                82              10,250 coins
+	Ancient Log               150             13,200 coins
+	Infernal Ore              88              6,688 coins
+	Snapdragon                117             7,488 coins
+	King Crab                 130             8,970 coins
+	Moonstone                 1               840 coins
+	Onyx                      6               5,760 coins
+|--------------------------------------------------------------|
+Profits
+Gold/hour (Produced): 263,896
+Gold/hour (Equipment): 215,196
+Gold/hour (Total): 48,700
+|--------------------------------------------------------------|
+
 
 ```

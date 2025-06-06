@@ -5,8 +5,12 @@
     "player": {
         "food_cost": 0,
         "food_health": 0,
+        
         "potion_cost": 0,
         "potent_level": 0,
+
+        "sigil_cost": 0,
+        "sigil_level": 0,
 
         "preserve_dungeon_chance": 0.0,
         "additional_coins_chance": 0.0,
