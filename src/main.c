@@ -7,6 +7,8 @@
 #include "parson.h"
 #include "market_parser.h"
 
+#define ALL_DUNGEONS 0
+
 struct Item {
     const char* name;
     const char* tag;
@@ -102,7 +104,7 @@ int main(int argc, char *argv[]) {
         printf("\t\t[85] - Dungeon 85\n");
         printf("\t\t[100] - Dungeon 100\n");
 
-        return -1;
+        return 0;
     } else if (argc == 4) {
         file_name = argv[1];
         parse_market_file = strtol(argv[2], NULL, 10);
@@ -112,7 +114,7 @@ int main(int argc, char *argv[]) {
     /* Get access to the json and confirm the root value is a json type */ 
     root_value = json_parse_file(file_name);
     if (json_value_get_type(root_value) != JSONObject) {
-        fprintf(stderr, "%s", "Incorrect JSON, expecting JSONObject\n");
+        fprintf(stderr, "%s", "Simulation JSON - Incorrect JSON, expecting JSONObject\n");
         return -1;
     }
 
@@ -171,7 +173,7 @@ int main(int argc, char *argv[]) {
         total_gold_value = 0;
         total_preserved_keys = 0;
 
-        if (display_type != 0) {
+        if (display_type != ALL_DUNGEONS) {
             if (json_object_get_number(dungeon, "level") != display_type)
                 continue;
         }
@@ -231,7 +233,7 @@ int main(int argc, char *argv[]) {
 
         printf("|--------------------------------------------------------------|\n");
         printf("Consumed\n");
-        printf("\t%-25s %s\n", "Item", "Value");
+        printf("\t%-25s %s\n", "Item", "Gold Per Hour");
         printf("\t%-25s %s\n", "-----", "-----");
         printf("\t%-25s ", "Pie"); printf_commas(food_cost_per_hour, 0);
         printf(" / hour\n");
@@ -329,11 +331,11 @@ int main(int argc, char *argv[]) {
 
             printf("Total Gold (AVG Hours): "); printf_commas(total_gold_value / SIMULATED_HOURS, 0);
             printf("\n");
-            printf("--------------------------------------------------------------\n");
+            printf("|--------------------------------------------------------------|\n");
         }
 
         printf("Loot (Total)\n");
-        printf("\t%-25s %-15s %s\n", "Item", "Amount", "Gold");
+        printf("\t%-25s %-15s %s\n", "Item", "Amount", "Total Gold");
         printf("\t%-25s %-15s %s\n", "-----", "-----", "----------");
         for (j = 0; j < json_array_get_count(drops); j++) {
             printf("\t%-25s ", item_drops[j].name); 

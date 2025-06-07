@@ -3,7 +3,7 @@ CFLAGS := -Wall -Wextra -std=c99 -pedantic -g
 
 SRC_DIR := src
 BUILD_DIR := build
-SIM_JSON := ./json/simulation_values.json
+SIM_JSON := json/simulation_values.json
 # Default values for arugments
 MARKET_PARSE := 1
 DISPLAY_TYPE := 100
@@ -37,3 +37,6 @@ clean:
 
 run: 
 	$(TARGET) $(SIM_JSON) $(MARKET_PARSE) $(DISPLAY_TYPE)
+
+help:
+	$(TARGET) $(SIM_JSON)

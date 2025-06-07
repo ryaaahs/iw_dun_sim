@@ -22,7 +22,8 @@ You can change the options by providing arguments like so `make run MARKET_PARSE
 
 ## Example Output:
 ```
-./build/iw_dun_sim ./json/simulation_values.json
+make help
+build/iw_dun_sim json/simulation_values.json
 NAME
 	iw_dun_sim - Dungeon Simulator for IWRPG game
 SYNOPSIS
@@ -43,44 +44,61 @@ ARGUMENTS
 		[85] - Dungeon 85
 		[100] - Dungeon 100
 
-make run MARKET_PARSE=1 DISPLAY_TYPE=100
-build/iw_dun_sim ./json/simulation_values.json 1 100
+make run
+build/iw_dun_sim json/simulation_values.json 1 100
 |--------------------------------------------------------------|
 Usage
 	Key                       Value
 	-----                     -----
 	Level                     100
-	Simulated Hours           1
-	Rolls                     498
-	Double Loot Procs         27
-	Total Keys                56
-	Total Keys Preserved      4
+	Simulated Hours           168
+	Rolls (AVG Hours)         499
+	Rolls                     83,976
+	Double Loot Procs         4,588
+	Total Keys                9,408
+	Total Keys Preserved      585
 |--------------------------------------------------------------|
 Consumed
-	Item                      Value
+	Item                      Gold Per Hour
 	-----                     -----
 	Pie                       87,360 / hour
 	Potion                    37,044 / hour
 	Sigil                     2,912 / hour
-	Keys                      87,880 / hour
+	Keys                      87,704 / hour
+|--------------------------------------------------------------|
+Loot (AVG Hours)
+	Item                      Amount          Gold Per Hour
+	-----                     -----           ----------
+	Gold                      1               170,994 / hour
+	Giant Fang                419             36,079 / hour
+	Giant Bone                80              6,754 / hour
+	Large Fang                80              9,549 / hour
+	Ancient Log               108             9,662 / hour
+	Infernal Ore              107             7,714 / hour
+	Snapdragon                107             6,547 / hour
+	King Crab                 106             8,304 / hour
+	Moonstone                 3               3,210 / hour
+	Onyx                      4               3,874 / hour
+Total Gold (AVG Hours): 262,691
 |--------------------------------------------------------------|
 Loot (Total)
-	Item                      Amount          Gold
+	Item                      Amount          Total Gold
 	-----                     -----           ----------
-	Gold                      165,102         165,102 coins
-	Giant Fang                424             39,856 coins
-	Giant Bone                66              5,742 coins
-	Large Fang                82              10,250 coins
-	Ancient Log               150             13,200 coins
-	Infernal Ore              88              6,688 coins
-	Snapdragon                117             7,488 coins
-	King Crab                 130             8,970 coins
-	Moonstone                 1               840 coins
-	Onyx                      6               5,760 coins
+	Gold                      28,727,144      28,727,144 coins
+	Giant Fang                70,481          6,061,366 coins
+	Giant Bone                13,509          1,134,756 coins
+	Large Fang                13,481          1,604,239 coins
+	Ancient Log               18,239          1,623,271 coins
+	Infernal Ore              18,001          1,296,072 coins
+	Snapdragon                18,033          1,100,013 coins
+	King Crab                 17,886          1,395,108 coins
+	Moonstone                 642             539,280 coins
+	Onyx                      678             650,880 coins
+Total Gold: 44,132,129
 |--------------------------------------------------------------|
 Profits
-Gold/hour (Produced): 263,896
-Gold/hour (Equipment): 215,196
-Gold/hour (Total): 48,700
+Gold/hour (Produced): 262,691
+Gold/hour (Equipment): 215,020
+Gold/hour (Total): 47,670
 |--------------------------------------------------------------|
 ```
