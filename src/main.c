@@ -9,6 +9,8 @@
 
 #define ALL_DUNGEONS 0
 
+typedef struct Item Item; 
+
 struct Item {
     const char* name;
     const char* tag;
@@ -24,7 +26,7 @@ double rand_zero_one();
 
 int rand_number_range(int min, int max);
 
-int assign_market_values(JSON_Object *game_values, struct Item *item_drops, size_t drops_length);
+int assign_market_values(JSON_Object *game_values, Item *item_drops, size_t drops_length);
 
 /* https://stackoverflow.com/a/1449859 */
 void printf_commas(int value, size_t padding);
@@ -162,11 +164,11 @@ int main(int argc, char *argv[]) {
                 loot
     */
     for (i = 0; i < json_array_get_count(dungeons); i++) {
-        struct Item *item_drops;
+     Item *item_drops;
 
         dungeon = json_array_get_object(dungeons, i);
         drops = json_object_get_array(dungeon, "drops");
-        item_drops = malloc(json_array_get_count(drops) * sizeof(struct Item)); 
+        item_drops = malloc(json_array_get_count(drops) * sizeof(Item)); 
         rolls = 0;
         banked_bone_one = 0;
         banked_bone_two = 0;
@@ -423,7 +425,7 @@ void printf_commas(int value, size_t padding) {
     }
 }
 
-int assign_market_values(JSON_Object *game_values, struct Item *item_drops, size_t drops_length) {
+int assign_market_values(JSON_Object *game_values, Item *item_drops, size_t drops_length) {
     char buffer[50];
     size_t j;
 

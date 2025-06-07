@@ -5,6 +5,25 @@
 #include "market_parser.h"
 #include "parson.h"
 
+#define MARKET_COST_OVERFLOW 500
+
+typedef struct PriceContainer PriceContainer;
+
+typedef struct MarketItem MarketItem;
+
+int serialize_sim_data(JSON_Value *sim_root_value, PriceContainer *price_containers);
+
+int reset_sim_data(JSON_Value *sim_root_value);
+
+int compare_bone_prices(PriceContainer *price_containers, MarketItem item, const char* key, int index);
+
+int compare_skill_material_prices(PriceContainer *price_containers, MarketItem item, const char* key, int index);
+
+int compare_sub_material_prices(PriceContainer *price_containers, MarketItem item, const char* key, int index);
+
+void compare_item_prices(JSON_Array *dungeons, PriceContainer *price_containers, MarketItem item);
+
+
 struct PriceContainer {
     double key_price;
     double bone_price;
@@ -18,35 +37,29 @@ struct PriceContainer {
     double gemstone_two_price;
 }; 
 
-int serialize_sim_data(JSON_Value *sim_root_value, struct PriceContainer *price_containers);
-
-int reset_sim_data(JSON_Value *sim_root_value);
+struct MarketItem {
+    int market_parse_type; 
+    int market_order_type; 
+    double item_price;
+    int id;
+};
 
 int parse_market_data(JSON_Value *sim_root_value, int market_parse_type) {
     struct PriceContainer *price_containers;
+    struct MarketItem item;
     JSON_Object *game_values;
     JSON_Array *dungeons;
-    JSON_Object *dungeon;
-    JSON_Array *drops;
-    JSON_Object *drop;
-
+    
     JSON_Value *market_root_value;
     JSON_Object *market_data;
     JSON_Array *listings;
     JSON_Object *listing;
     size_t i;
     size_t j;
-    size_t n;
-
+    
     /* Game will not display values over a certian value for items */
     /* TODO: Figure out the formula that is used in game to determine this value for items */
-    int MARKET_COST_OVERFLOW = 500;
-
-    long int id;
-    int market_order_type;
-    double cost;
-    const char *key;
-    
+     
     if (access(MARKET_DATA_JSON, F_OK) != 0) {
         fprintf(stderr, "File not found in JSON folder: %s\n", MARKET_DATA_JSON);
         return -1;
@@ -64,6 +77,7 @@ int parse_market_data(JSON_Value *sim_root_value, int market_parse_type) {
     game_values = json_value_get_object(sim_root_value);
     dungeons = json_object_get_array(game_values, "dungeons");
     price_containers = malloc(json_array_get_count(dungeons) * sizeof(struct PriceContainer)); 
+    item.market_parse_type = market_parse_type;
 
     /* Initialize struct to remove valgrind errors */
     for (j = 0; j < json_array_get_count(dungeons); j++) {
@@ -84,357 +98,11 @@ int parse_market_data(JSON_Value *sim_root_value, int market_parse_type) {
 
     for (i = 0; i < json_array_get_count(listings); i++) {
         listing = json_array_get_object(listings, i);
-        id = strtol(json_object_get_string(listing, "itemId"), NULL, 10);
-
-        market_order_type = strtol(json_object_get_string(listing, "type"), NULL, 10);
-        cost = json_object_get_number(listing, "cost");
-
-        for (n = 0; n < json_array_get_count(dungeons); n++) {
-            dungeon = json_array_get_object(dungeons, n);
-            drops = json_object_get_array(dungeon, "drops");
+        item.id = strtol(json_object_get_string(listing, "itemId"), NULL, 10);
+        item.market_order_type = strtol(json_object_get_string(listing, "type"), NULL, 10);
+        item.item_price = json_object_get_number(listing, "cost");
         
-            /* Keys */
-            if (json_object_dotget_number(dungeon, "key.id") == id) {
-                if (price_containers[n].key_price == 0.0) {
-                    price_containers[n].key_price = cost;
-                } 
-
-                if (market_parse_type == LOWEST_LISTING) {
-                    if (market_order_type == SELL_ORDER) {
-                        if (cost < price_containers[n].key_price || cost > price_containers[n].key_price) {
-                            price_containers[n].key_price = cost;
-                        }
-                    } else if (market_order_type == BUY_ORDER) {
-                        if (cost > price_containers[n].key_price) {
-                            price_containers[n].key_price = cost;
-                        }
-                    }
-                } else if(market_parse_type == ONLY_SELL_ORDER) {
-                    if (market_order_type == 1 && cost < price_containers[n].key_price) {
-                        price_containers[n].key_price = cost;
-                    }
-                } else if(market_parse_type == ONLY_BUY_ORDER) {
-                    if (market_order_type == 2 && cost > price_containers[n].key_price) {
-                        price_containers[n].key_price = cost;
-                    }
-                }
-
-            }
-            
-            for (j = 0; j < json_array_get_count(drops); j++) {
-                drop = json_array_get_object(drops, j);
-                key = json_object_get_string(drop, "key");
-
-                if(strcmp(key, "gold") == 0) 
-                    continue;
-                    
-                if (json_object_get_number(drop, "id") == id) {
-                    if (strcmp(key, "bone") == 0) {
-                        if (cost > MARKET_COST_OVERFLOW)
-                            continue;
-                        
-                        if (market_parse_type == LOWEST_LISTING) {
-                            if (price_containers[n].bone_price == 0) {
-                                price_containers[n].bone_price = cost;
-                            }
-
-                            if (market_order_type == SELL_ORDER) {
-                                if (cost < price_containers[n].bone_price || cost > price_containers[n].bone_price) {
-                                    price_containers[n].bone_price = cost;
-                                }
-                            } else if (market_order_type == BUY_ORDER) {
-                                if (cost > price_containers[n].bone_price) {
-                                    price_containers[n].bone_price = cost;
-                                }
-                            }
-                        } else if(market_parse_type == ONLY_SELL_ORDER && market_order_type == SELL_ORDER) {
-
-                            if (price_containers[n].bone_price == 0) {
-                                price_containers[n].bone_price = cost;
-                            } else if (cost < price_containers[n].bone_price) {
-                                price_containers[n].bone_price = cost;
-                            }
-                        } else if(market_parse_type == ONLY_BUY_ORDER && market_order_type == BUY_ORDER) {
-
-                            if (price_containers[n].bone_price == 0) {
-                                price_containers[n].bone_price = cost;
-                            } else if (cost > price_containers[n].bone_price) {
-                                price_containers[n].bone_price = cost;
-                            }
-                        }
-
-                    } else if (strcmp(key, "bone_one") == 0) {
-                        if (cost > MARKET_COST_OVERFLOW)
-                            continue;
-
-                        if (market_parse_type == LOWEST_LISTING) {
-                            if (price_containers[n].bone_one_price == 0.0) {
-                                price_containers[n].bone_one_price = cost;
-                            }
-
-                            if (market_order_type == SELL_ORDER) {
-                                if (cost < price_containers[n].bone_one_price || cost > price_containers[n].bone_one_price) {
-                                    price_containers[n].bone_one_price = cost;
-                                }
-                            } else if (market_order_type == BUY_ORDER) {
-                                if (cost > price_containers[n].bone_one_price) {
-                                    price_containers[n].bone_one_price = cost;
-                                }
-                            }
-                        } else if(market_parse_type == ONLY_SELL_ORDER && market_order_type == SELL_ORDER) {
-
-                            if (price_containers[n].bone_one_price == 0.0) {
-                                price_containers[n].bone_one_price = cost;
-                            }else if ( cost < price_containers[n].bone_one_price) {
-                                price_containers[n].bone_one_price = cost;
-                            }
-                        } else if(market_parse_type == ONLY_BUY_ORDER && market_order_type == BUY_ORDER) {
-
-                            if (price_containers[n].bone_one_price == 0.0) {
-                                price_containers[n].bone_one_price = cost;
-                            } else if ( cost > price_containers[n].bone_one_price) {
-                                price_containers[n].bone_one_price = cost;
-                            }
-                        }
-
-                    } else if (strcmp(key, "bone_two") == 0) {
-                        if (cost > MARKET_COST_OVERFLOW)
-                            continue;
-                        
-                        if (market_parse_type == LOWEST_LISTING) {
-
-                            if (price_containers[n].bone_two_price == 0.0) {
-                                price_containers[n].bone_two_price = cost;
-                            } 
-
-                            if (market_order_type == SELL_ORDER) {
-                                if (cost < price_containers[n].bone_two_price || cost > price_containers[n].bone_two_price) {
-                                    price_containers[n].bone_two_price = cost;
-                                }
-                            } else if (market_order_type == BUY_ORDER) {
-                                if (cost > price_containers[n].bone_two_price) {
-                                    price_containers[n].bone_two_price = cost;
-                                }
-                            }
-                        } else if(market_parse_type == ONLY_SELL_ORDER && market_order_type == SELL_ORDER) {
-
-                            if (price_containers[n].bone_two_price == 0.0) {
-                                price_containers[n].bone_two_price = cost;
-                            } else if (cost < price_containers[n].bone_two_price) {
-                                price_containers[n].bone_two_price = cost;
-                            }
-                        } else if(market_parse_type == ONLY_BUY_ORDER && market_order_type == BUY_ORDER) {
-                            
-                            if (price_containers[n].bone_two_price == 0.0) {
-                                price_containers[n].bone_two_price = cost;
-                            } else if (cost > price_containers[n].bone_two_price) {
-                                price_containers[n].bone_two_price = cost;
-                            }
-                        }
-
-                    } else if (strcmp(key, "log") == 0) {
-                        if (cost > MARKET_COST_OVERFLOW)
-                            continue;
-
-                        if (market_parse_type == LOWEST_LISTING) {
-                            if (price_containers[n].log_price == 0.0) {
-                                price_containers[n].log_price = cost;
-                            }
-
-                            if (market_order_type == SELL_ORDER) {
-                                if (cost < price_containers[n].log_price || cost > price_containers[n].log_price) {
-                                    price_containers[n].log_price = cost;
-                                }
-                            } else if (market_order_type == BUY_ORDER) {
-                                if (cost > price_containers[n].log_price) {
-                                    price_containers[n].log_price = cost;
-                                }
-                            }
-                        } else if(market_parse_type == ONLY_SELL_ORDER && market_order_type == SELL_ORDER) {
-
-                            if (price_containers[n].log_price == 0.0) {
-                                price_containers[n].log_price = cost;
-                            } else if (cost < price_containers[n].log_price) {
-                                price_containers[n].log_price = cost;
-                            }
-                        } else if(market_parse_type == ONLY_BUY_ORDER && market_order_type == BUY_ORDER) {
-                            
-                            if (price_containers[n].log_price == 0.0) {
-                                price_containers[n].log_price = cost;
-                            } else if (cost > price_containers[n].log_price) {
-                                price_containers[n].log_price = cost;
-                            }
-                        }
-
-                    } else if (strcmp(key, "ore") == 0) {
-                        if (cost > MARKET_COST_OVERFLOW)
-                            continue;
-
-                        if (market_parse_type == LOWEST_LISTING) {
-                            if (price_containers[n].ore_price == 0.0) {
-                                price_containers[n].ore_price = cost;
-                            }
-
-                            if (market_order_type == SELL_ORDER) {
-                                if (cost < price_containers[n].ore_price || cost > price_containers[n].ore_price) {
-                                    price_containers[n].ore_price = cost;
-                                }
-                            } else if (market_order_type == BUY_ORDER) {
-                                if (cost > price_containers[n].ore_price) {
-                                    price_containers[n].ore_price = cost;
-                                }
-                            }
-                        } else if(market_parse_type == ONLY_SELL_ORDER && market_order_type == SELL_ORDER) {
-
-                            if (price_containers[n].ore_price == 0.0) {
-                                price_containers[n].ore_price = cost;
-                            } else if (cost < price_containers[n].ore_price) {
-                                price_containers[n].ore_price = cost;
-                            }
-                        } else if(market_parse_type == ONLY_BUY_ORDER && market_order_type == BUY_ORDER) {
-
-                            if (price_containers[n].ore_price == 0.0) {
-                                price_containers[n].ore_price = cost;
-                            } else if (cost > price_containers[n].ore_price) {
-                                price_containers[n].ore_price = cost;
-                            }
-                        }
-
-                    } else if (strcmp(key, "flower") == 0) {
-                        if (cost > MARKET_COST_OVERFLOW)
-                            continue;
-
-                        if (market_parse_type == LOWEST_LISTING) {
-                            if (price_containers[n].flower_price == 0.0) {
-                                price_containers[n].flower_price = cost;
-                            }
-
-                            if (market_order_type == SELL_ORDER) {
-                                if (cost < price_containers[n].flower_price || cost > price_containers[n].flower_price) {
-                                    price_containers[n].flower_price = cost;
-                                }
-                            } else if (market_order_type == BUY_ORDER) {
-                                if (cost > price_containers[n].flower_price) {
-                                    price_containers[n].flower_price = cost;
-                                }
-                            }
-                        } else if(market_parse_type == ONLY_SELL_ORDER && market_order_type == SELL_ORDER) {
-                            
-                            if (price_containers[n].flower_price == 0.0) {
-                                price_containers[n].flower_price = cost;
-                            } else if (cost < price_containers[n].flower_price) {
-                                price_containers[n].flower_price = cost;
-                            }
-                        } else if(market_parse_type == ONLY_BUY_ORDER && market_order_type == BUY_ORDER) {
-                            
-                            if (price_containers[n].flower_price == 0.0) {
-                                price_containers[n].flower_price = cost;
-                            } else if ( cost > price_containers[n].flower_price) {
-                                price_containers[n].flower_price = cost;
-                            }
-                        }
-
-                    } else if (strcmp(key, "fish") == 0) {
-                        if (cost > MARKET_COST_OVERFLOW)
-                            continue;
-
-                        if (market_parse_type == LOWEST_LISTING) {
-                            if (price_containers[n].fish_price == 0.0) {
-                                price_containers[n].fish_price = cost;
-                            } 
-
-                            if (market_order_type == SELL_ORDER) {
-                                if (cost < price_containers[n].fish_price || cost > price_containers[n].fish_price) {
-                                    price_containers[n].fish_price = cost;
-                                }
-                            } else if (market_order_type == BUY_ORDER) {
-                                if (cost > price_containers[n].fish_price) {
-                                    price_containers[n].fish_price = cost;
-                                }
-                            }
-                        } else if(market_parse_type == ONLY_SELL_ORDER && market_order_type == SELL_ORDER) {
-
-                            if (price_containers[n].fish_price == 0.0) {
-                                price_containers[n].fish_price = cost;
-                            } else if (cost < price_containers[n].fish_price) {
-                                price_containers[n].fish_price = cost;
-                            }
-                        } else if(market_parse_type == ONLY_BUY_ORDER && market_order_type == BUY_ORDER) {
-                            
-                            if (price_containers[n].fish_price == 0.0) {
-                                price_containers[n].fish_price = cost;
-                            } else if (cost > price_containers[n].fish_price) {
-                                price_containers[n].fish_price = cost;
-                            }
-                        }
-
-                    } else if (strcmp(key, "gemstone_one") == 0) {
-                        
-                        if (market_parse_type == LOWEST_LISTING) {
-                            if (price_containers[n].gemstone_one_price == 0.0) {
-                                price_containers[n].gemstone_one_price = cost;
-                            }
-
-                            if (market_order_type == SELL_ORDER) {
-                                if (cost < price_containers[n].gemstone_one_price || cost > price_containers[n].gemstone_one_price) {
-                                    price_containers[n].gemstone_one_price = cost;
-                                }
-                            } else if (market_order_type == BUY_ORDER) {
-                                if (cost > price_containers[n].gemstone_one_price) {
-                                    price_containers[n].gemstone_one_price = cost;
-                                }
-                            }
-                        } else if(market_parse_type == ONLY_SELL_ORDER && market_order_type == SELL_ORDER) {
-                            
-                            if (price_containers[n].gemstone_one_price == 0.0) {
-                                price_containers[n].gemstone_one_price = cost;
-                            } else if (cost < price_containers[n].gemstone_one_price) {
-                                price_containers[n].gemstone_one_price = cost;
-                            }
-                        } else if(market_parse_type == ONLY_BUY_ORDER && market_order_type == BUY_ORDER) {
-                            
-                            if (price_containers[n].gemstone_one_price == 0.0) {
-                                price_containers[n].gemstone_one_price = cost;
-                            } else if (cost > price_containers[n].gemstone_one_price) {
-                                price_containers[n].gemstone_one_price = cost;
-                            }
-                        }
-
-                    } else if (strcmp(key, "gemstone_two") == 0) {
-                        
-                        if (market_parse_type == LOWEST_LISTING) {
-                            if (price_containers[n].gemstone_two_price == 0.0) {
-                                price_containers[n].gemstone_two_price = cost;
-                            } 
-
-                            if (market_order_type == SELL_ORDER) {
-                                if (cost < price_containers[n].gemstone_two_price || cost > price_containers[n].gemstone_two_price) {
-                                    price_containers[n].gemstone_two_price = cost;
-                                }
-                            } else if (market_order_type == BUY_ORDER) {
-                                if (cost > price_containers[n].gemstone_two_price) {
-                                    price_containers[n].gemstone_two_price = cost;
-                                }
-                            }
-                        } else if(market_parse_type == ONLY_SELL_ORDER && market_order_type == SELL_ORDER) {
-                            
-                            if (price_containers[n].gemstone_two_price == 0.0) {
-                                price_containers[n].gemstone_two_price = cost;
-                            } else if (cost < price_containers[n].gemstone_two_price) {
-                                price_containers[n].gemstone_two_price = cost;
-                            }
-                        } else if(market_parse_type == ONLY_BUY_ORDER && market_order_type == BUY_ORDER) {
-                            
-                            if (price_containers[n].gemstone_two_price == 0.0) {
-                                price_containers[n].gemstone_two_price = cost;
-                            } else if (cost > price_containers[n].gemstone_two_price) {
-                                price_containers[n].gemstone_two_price = cost;
-                            }
-                        }
-                    }
-                }
-            }
-        }        
+        compare_item_prices(dungeons, price_containers, item);
     }
     
     if (serialize_sim_data(sim_root_value, price_containers) == -1) {
@@ -447,7 +115,432 @@ int parse_market_data(JSON_Value *sim_root_value, int market_parse_type) {
     return 0;
 }
 
-int serialize_sim_data(JSON_Value *sim_root_value, struct PriceContainer *price_containers) {
+void compare_item_prices(JSON_Array *dungeons, PriceContainer *price_containers, MarketItem item) {
+    const char *key;
+    JSON_Object *dungeon;
+    JSON_Array *drops;
+    JSON_Object *drop;
+    size_t n;
+    size_t j;
+
+    for (n = 0; n < json_array_get_count(dungeons); n++) {
+        dungeon = json_array_get_object(dungeons, n);
+        drops = json_object_get_array(dungeon, "drops");
+    
+        /* Keys */
+        if (json_object_dotget_number(dungeon, "key.id") == item.id) {
+            if (price_containers[n].key_price == 0.0) {
+                price_containers[n].key_price = item.item_price;
+            } 
+
+            if (item.market_parse_type == LOWEST_LISTING) {
+                if (item.market_order_type == SELL_ORDER) {
+                    if (item.item_price < price_containers[n].key_price || item.item_price > price_containers[n].key_price) {
+                        price_containers[n].key_price = item.item_price;
+                    }
+                } else if (item.market_order_type == BUY_ORDER) {
+                    if (item.item_price > price_containers[n].key_price) {
+                        price_containers[n].key_price = item.item_price;
+                    }
+                }
+            } else if(item.market_parse_type == ONLY_SELL_ORDER) {
+                if (item.market_order_type == 1 && item.item_price < price_containers[n].key_price) {
+                    price_containers[n].key_price = item.item_price;
+                }
+            } else if(item.market_parse_type == ONLY_BUY_ORDER) {
+                if (item.market_order_type == 2 && item.item_price > price_containers[n].key_price) {
+                    price_containers[n].key_price = item.item_price;
+                }
+            }
+
+        }
+        
+        for (j = 0; j < json_array_get_count(drops); j++) {
+            drop = json_array_get_object(drops, j);
+            key = json_object_get_string(drop, "key");
+
+            if(strcmp(key, "gold") == 0) 
+                continue;
+
+            if (json_object_get_number(drop, "id") == item.id) {
+                if (compare_bone_prices(price_containers, item, key, n) == 1) continue;
+                else if (compare_skill_material_prices(price_containers, item, key, n) == 1) continue;
+                else if (compare_sub_material_prices(price_containers, item, key, n) == 1) continue;
+            }
+        }
+    }
+}
+
+int compare_bone_prices(PriceContainer *price_containers, MarketItem item, const char* key, int index) { 
+    
+    if (strcmp(key, "bone") == 0) {
+        if (item.item_price > MARKET_COST_OVERFLOW)
+            return 1;
+        
+        if (item.market_parse_type == 1) {
+            if (price_containers[index].bone_price == 0) {
+                price_containers[index].bone_price = item.item_price;
+                return 1; 
+            }
+
+            if (item.market_order_type == 1) {
+                if (item.item_price < price_containers[index].bone_price || item.item_price > price_containers[index].bone_price) {
+                    price_containers[index].bone_price = item.item_price;
+                    return 1; 
+                }
+            } else if (item.market_order_type == 2) {
+                if (item.item_price > price_containers[index].bone_price) {
+                    price_containers[index].bone_price = item.item_price;
+                    return 1; 
+                }
+            }
+        } else if(item.market_parse_type == 2 && item.market_order_type == 1) {
+
+            if (price_containers[index].bone_price == 0) {
+                price_containers[index].bone_price = item.item_price;
+                return 1; 
+            } else if (item.item_price < price_containers[index].bone_price) {
+                price_containers[index].bone_price = item.item_price;
+                return 1; 
+            }
+        } else if(item.market_parse_type == 3 && item.market_order_type == 2) {
+
+            if (price_containers[index].bone_price == 0) {
+                price_containers[index].bone_price = item.item_price;
+                return 1; 
+            } else if (item.item_price > price_containers[index].bone_price) {
+                price_containers[index].bone_price = item.item_price;
+                return 1; 
+            }
+        }
+
+    } else if (strcmp(key, "bone_one") == 0) {
+        if (item.item_price > MARKET_COST_OVERFLOW)
+            return 1;
+
+        if (item.market_parse_type == 1) {
+            if (price_containers[index].bone_one_price == 0.0) {
+                price_containers[index].bone_one_price = item.item_price;
+                return 1; 
+            }
+
+            if (item.market_order_type == 1) {
+                if (item.item_price < price_containers[index].bone_one_price || item.item_price > price_containers[index].bone_one_price) {
+                    price_containers[index].bone_one_price = item.item_price;
+                    return 1; 
+                }
+            } else if (item.market_order_type == 2) {
+                if (item.item_price > price_containers[index].bone_one_price) {
+                    price_containers[index].bone_one_price = item.item_price;
+                    return 1; 
+                }
+            }
+        } else if(item.market_parse_type == 2 && item.market_order_type == 1) {
+
+            if (price_containers[index].bone_one_price == 0.0) {
+                price_containers[index].bone_one_price = item.item_price;
+                return 1; 
+            }else if ( item.item_price < price_containers[index].bone_one_price) {
+                price_containers[index].bone_one_price = item.item_price;
+                return 1; 
+            }
+        } else if(item.market_parse_type == 3 && item.market_order_type == 2) {
+
+            if (price_containers[index].bone_one_price == 0.0) {
+                price_containers[index].bone_one_price = item.item_price;
+                return 1; 
+            } else if ( item.item_price > price_containers[index].bone_one_price) {
+                price_containers[index].bone_one_price = item.item_price;
+                return 1; 
+            }
+        }
+
+    } else if (strcmp(key, "bone_two") == 0) {
+        if (item.item_price > MARKET_COST_OVERFLOW)
+            return 1;
+        
+        if (item.market_parse_type == 1) {
+
+            if (price_containers[index].bone_two_price == 0.0) {
+                price_containers[index].bone_two_price = item.item_price;
+                return 1; 
+            } 
+
+            if (item.market_order_type == 1) {
+                if (item.item_price < price_containers[index].bone_two_price || item.item_price > price_containers[index].bone_two_price) {
+                    price_containers[index].bone_two_price = item.item_price;
+                    return 1; 
+                }
+            } else if (item.market_order_type == 2) {
+                if (item.item_price > price_containers[index].bone_two_price) {
+                    price_containers[index].bone_two_price = item.item_price;
+                    return 1; 
+                }
+            }
+        } else if(item.market_parse_type == 2 && item.market_order_type == 1) {
+
+            if (price_containers[index].bone_two_price == 0.0) {
+                price_containers[index].bone_two_price = item.item_price;
+                return 1; 
+            } else if (item.item_price < price_containers[index].bone_two_price) {
+                price_containers[index].bone_two_price = item.item_price;
+                return 1; 
+            }
+        } else if(item.market_parse_type == 3 && item.market_order_type == 2) {
+            
+            if (price_containers[index].bone_two_price == 0.0) {
+                price_containers[index].bone_two_price = item.item_price;
+                return 1; 
+            } else if (item.item_price > price_containers[index].bone_two_price) {
+                price_containers[index].bone_two_price = item.item_price;
+                return 1; 
+            }
+        }
+
+    }
+    return 0;
+}
+
+int compare_skill_material_prices(PriceContainer *price_containers, MarketItem item, const char* key, int index) {
+    
+    if (strcmp(key, "log") == 0) {
+        if (item.item_price > MARKET_COST_OVERFLOW)
+            return 1;
+
+        if (item.market_parse_type == LOWEST_LISTING) {
+            if (price_containers[index].log_price == 0.0) {
+                price_containers[index].log_price = item.item_price;
+                return 1; 
+            }
+
+            if (item.market_order_type == SELL_ORDER) {
+                if (item.item_price < price_containers[index].log_price || item.item_price > price_containers[index].log_price) {
+                    price_containers[index].log_price = item.item_price;
+                    return 1; 
+                }
+            } else if (item.market_order_type == BUY_ORDER) {
+                if (item.item_price > price_containers[index].log_price) {
+                    price_containers[index].log_price = item.item_price;
+                    return 1; 
+                }
+            }
+        } else if(item.market_parse_type == ONLY_SELL_ORDER && item.market_order_type == SELL_ORDER) {
+
+            if (price_containers[index].log_price == 0.0) {
+                price_containers[index].log_price = item.item_price;
+                return 1; 
+            } else if (item.item_price < price_containers[index].log_price) {
+                price_containers[index].log_price = item.item_price;
+                return 1; 
+            }
+        } else if(item.market_parse_type == ONLY_BUY_ORDER && item.market_order_type == BUY_ORDER) {
+            
+            if (price_containers[index].log_price == 0.0) {
+                price_containers[index].log_price = item.item_price;
+                return 1; 
+            } else if (item.item_price > price_containers[index].log_price) {
+                price_containers[index].log_price = item.item_price;
+                return 1; 
+            }
+        }
+
+    } else if (strcmp(key, "ore") == 0) {
+        if (item.item_price > MARKET_COST_OVERFLOW)
+            return 1;
+
+        if (item.market_parse_type == LOWEST_LISTING) {
+            if (price_containers[index].ore_price == 0.0) {
+                price_containers[index].ore_price = item.item_price;
+                return 1; 
+            }
+
+            if (item.market_order_type == SELL_ORDER) {
+                if (item.item_price < price_containers[index].ore_price || item.item_price > price_containers[index].ore_price) {
+                    price_containers[index].ore_price = item.item_price;
+                    return 1; 
+                }
+            } else if (item.market_order_type == BUY_ORDER) {
+                if (item.item_price > price_containers[index].ore_price) {
+                    price_containers[index].ore_price = item.item_price;
+                    return 1; 
+                }
+            }
+        } else if(item.market_parse_type == ONLY_SELL_ORDER && item.market_order_type == SELL_ORDER) {
+
+            if (price_containers[index].ore_price == 0.0) {
+                price_containers[index].ore_price = item.item_price;
+                return 1; 
+            } else if (item.item_price < price_containers[index].ore_price) {
+                price_containers[index].ore_price = item.item_price;
+                return 1; 
+            }
+        } else if(item.market_parse_type == ONLY_BUY_ORDER && item.market_order_type == BUY_ORDER) {
+
+            if (price_containers[index].ore_price == 0.0) {
+                price_containers[index].ore_price = item.item_price;
+                return 1; 
+            } else if (item.item_price > price_containers[index].ore_price) {
+                price_containers[index].ore_price = item.item_price;
+                return 1; 
+            }
+        }
+
+    } else if (strcmp(key, "flower") == 0) {
+        if (item.item_price > MARKET_COST_OVERFLOW)
+            return 1;
+
+        if (item.market_parse_type == LOWEST_LISTING) {
+            if (price_containers[index].flower_price == 0.0) {
+                price_containers[index].flower_price = item.item_price;
+                return 1; 
+            }
+
+            if (item.market_order_type == SELL_ORDER) {
+                if (item.item_price < price_containers[index].flower_price || item.item_price > price_containers[index].flower_price) {
+                    price_containers[index].flower_price = item.item_price;
+                    return 1; 
+                }
+            } else if (item.market_order_type == BUY_ORDER) {
+                if (item.item_price > price_containers[index].flower_price) {
+                    price_containers[index].flower_price = item.item_price;
+                    return 1; 
+                }
+            }
+        } else if(item.market_parse_type == ONLY_SELL_ORDER && item.market_order_type == SELL_ORDER) {
+            
+            if (price_containers[index].flower_price == 0.0) {
+                price_containers[index].flower_price = item.item_price;
+                return 1; 
+            } else if (item.item_price < price_containers[index].flower_price) {
+                price_containers[index].flower_price = item.item_price;
+                return 1; 
+            }
+        } else if(item.market_parse_type == ONLY_BUY_ORDER && item.market_order_type == BUY_ORDER) {
+            
+            if (price_containers[index].flower_price == 0.0) {
+                price_containers[index].flower_price = item.item_price;
+                return 1; 
+            } else if ( item.item_price > price_containers[index].flower_price) {
+                price_containers[index].flower_price = item.item_price;
+                return 1; 
+            }
+        }
+
+    } else if (strcmp(key, "fish") == 0) {
+        if (item.item_price > MARKET_COST_OVERFLOW)
+            return 1;
+
+        if (item.market_parse_type == LOWEST_LISTING) {
+            if (price_containers[index].fish_price == 0.0) {
+                price_containers[index].fish_price = item.item_price;
+                return 1; 
+            } 
+
+            if (item.market_order_type == SELL_ORDER) {
+                if (item.item_price < price_containers[index].fish_price || item.item_price > price_containers[index].fish_price) {
+                    price_containers[index].fish_price = item.item_price;
+                    return 1; 
+                }
+            } else if (item.market_order_type == BUY_ORDER) {
+                if (item.item_price > price_containers[index].fish_price) {
+                    price_containers[index].fish_price = item.item_price;
+                    return 1; 
+                }
+            }
+        } else if(item.market_parse_type == ONLY_SELL_ORDER && item.market_order_type == SELL_ORDER) {
+
+            if (price_containers[index].fish_price == 0.0) {
+                price_containers[index].fish_price = item.item_price;
+                return 1; 
+            } else if (item.item_price < price_containers[index].fish_price) {
+                price_containers[index].fish_price = item.item_price;
+                return 1; 
+            }
+        } else if(item.market_parse_type == ONLY_BUY_ORDER && item.market_order_type == BUY_ORDER) {
+            
+            if (price_containers[index].fish_price == 0.0) {
+                price_containers[index].fish_price = item.item_price;
+                return 1; 
+            } else if (item.item_price > price_containers[index].fish_price) {
+                price_containers[index].fish_price = item.item_price;
+                return 1; 
+            }
+        }
+    }
+
+    return 0;
+}
+
+int compare_sub_material_prices(PriceContainer *price_containers, MarketItem item, const char* key, int index) {
+    
+    if (strcmp(key, "gemstone_one") == 0) {
+        if (item.market_parse_type == LOWEST_LISTING) {
+            if (price_containers[index].gemstone_one_price == 0.0) {
+                price_containers[index].gemstone_one_price = item.item_price;
+            }
+
+            if (item.market_order_type == SELL_ORDER) {
+                if (item.item_price < price_containers[index].gemstone_one_price || item.item_price > price_containers[index].gemstone_one_price) {
+                    price_containers[index].gemstone_one_price = item.item_price;
+                }
+            } else if (item.market_order_type == BUY_ORDER) {
+                if (item.item_price > price_containers[index].gemstone_one_price) {
+                    price_containers[index].gemstone_one_price = item.item_price;
+                }
+            }
+        } else if(item.market_parse_type == ONLY_SELL_ORDER && item.market_order_type == SELL_ORDER) {
+            
+            if (price_containers[index].gemstone_one_price == 0.0) {
+                price_containers[index].gemstone_one_price = item.item_price;
+            } else if (item.item_price < price_containers[index].gemstone_one_price) {
+                price_containers[index].gemstone_one_price = item.item_price;
+            }
+        } else if(item.market_parse_type == ONLY_BUY_ORDER && item.market_order_type == BUY_ORDER) {
+            
+            if (price_containers[index].gemstone_one_price == 0.0) {
+                price_containers[index].gemstone_one_price = item.item_price;
+            } else if (item.item_price > price_containers[index].gemstone_one_price) {
+                price_containers[index].gemstone_one_price = item.item_price;
+            }
+        }
+
+    } else if (strcmp(key, "gemstone_two") == 0) {
+        
+        if (item.market_parse_type == LOWEST_LISTING) {
+            if (price_containers[index].gemstone_two_price == 0.0) {
+                price_containers[index].gemstone_two_price = item.item_price;
+            } 
+
+            if (item.market_order_type == SELL_ORDER) {
+                if (item.item_price < price_containers[index].gemstone_two_price || item.item_price > price_containers[index].gemstone_two_price) {
+                    price_containers[index].gemstone_two_price = item.item_price;
+                }
+            } else if (item.market_order_type == BUY_ORDER) {
+                if (item.item_price > price_containers[index].gemstone_two_price) {
+                    price_containers[index].gemstone_two_price = item.item_price;
+                }
+            }
+        } else if(item.market_parse_type == ONLY_SELL_ORDER && item.market_order_type == SELL_ORDER) {
+            
+            if (price_containers[index].gemstone_two_price == 0.0) {
+                price_containers[index].gemstone_two_price = item.item_price;
+            } else if (item.item_price < price_containers[index].gemstone_two_price) {
+                price_containers[index].gemstone_two_price = item.item_price;
+            }
+        } else if(item.market_parse_type == ONLY_BUY_ORDER && item.market_order_type == BUY_ORDER) {
+            
+            if (price_containers[index].gemstone_two_price == 0.0) {
+                price_containers[index].gemstone_two_price = item.item_price;
+            } else if (item.item_price > price_containers[index].gemstone_two_price) {
+                price_containers[index].gemstone_two_price = item.item_price;
+            }
+        }
+    }
+
+    return 0;
+}
+
+int serialize_sim_data(JSON_Value *sim_root_value, PriceContainer *price_containers) {
     JSON_Object *game_values;
     JSON_Array *dungeons;
     JSON_Object *dungeon;
