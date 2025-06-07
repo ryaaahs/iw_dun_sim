@@ -23,7 +23,6 @@ int compare_sub_material_prices(PriceContainer *price_containers, MarketItem ite
 
 void compare_item_prices(JSON_Array *dungeons, PriceContainer *price_containers, MarketItem item);
 
-
 struct PriceContainer {
     double key_price;
     double bone_price;
@@ -45,8 +44,8 @@ struct MarketItem {
 };
 
 int parse_market_data(JSON_Value *sim_root_value, int market_parse_type) {
-    struct PriceContainer *price_containers;
-    struct MarketItem item;
+    PriceContainer *price_containers;
+    MarketItem item;
     JSON_Object *game_values;
     JSON_Array *dungeons;
     
@@ -76,7 +75,7 @@ int parse_market_data(JSON_Value *sim_root_value, int market_parse_type) {
 
     game_values = json_value_get_object(sim_root_value);
     dungeons = json_object_get_array(game_values, "dungeons");
-    price_containers = malloc(json_array_get_count(dungeons) * sizeof(struct PriceContainer)); 
+    price_containers = malloc(json_array_get_count(dungeons) * sizeof(PriceContainer)); 
     item.market_parse_type = market_parse_type;
 
     /* Initialize struct to remove valgrind errors */
@@ -178,23 +177,23 @@ int compare_bone_prices(PriceContainer *price_containers, MarketItem item, const
             return 1;
         
         if (item.market_parse_type == 1) {
-            if (price_containers[index].bone_price == 0) {
+            if (price_containers[index].bone_price == LOWEST_LISTING) {
                 price_containers[index].bone_price = item.item_price;
                 return 1; 
             }
 
-            if (item.market_order_type == 1) {
+            if (item.market_order_type == SELL_ORDER) {
                 if (item.item_price < price_containers[index].bone_price || item.item_price > price_containers[index].bone_price) {
                     price_containers[index].bone_price = item.item_price;
                     return 1; 
                 }
-            } else if (item.market_order_type == 2) {
+            } else if (item.market_order_type == BUY_ORDER) {
                 if (item.item_price > price_containers[index].bone_price) {
                     price_containers[index].bone_price = item.item_price;
                     return 1; 
                 }
             }
-        } else if(item.market_parse_type == 2 && item.market_order_type == 1) {
+        } else if(item.market_parse_type == ONLY_SELL_ORDER && item.market_order_type == SELL_ORDER) {
 
             if (price_containers[index].bone_price == 0) {
                 price_containers[index].bone_price = item.item_price;
@@ -203,7 +202,7 @@ int compare_bone_prices(PriceContainer *price_containers, MarketItem item, const
                 price_containers[index].bone_price = item.item_price;
                 return 1; 
             }
-        } else if(item.market_parse_type == 3 && item.market_order_type == 2) {
+        } else if(item.market_parse_type == ONLY_BUY_ORDER && item.market_order_type == BUY_ORDER) {
 
             if (price_containers[index].bone_price == 0) {
                 price_containers[index].bone_price = item.item_price;
@@ -218,24 +217,24 @@ int compare_bone_prices(PriceContainer *price_containers, MarketItem item, const
         if (item.item_price > MARKET_COST_OVERFLOW)
             return 1;
 
-        if (item.market_parse_type == 1) {
+        if (item.market_parse_type == LOWEST_LISTING) {
             if (price_containers[index].bone_one_price == 0.0) {
                 price_containers[index].bone_one_price = item.item_price;
                 return 1; 
             }
 
-            if (item.market_order_type == 1) {
+            if (item.market_order_type == SELL_ORDER) {
                 if (item.item_price < price_containers[index].bone_one_price || item.item_price > price_containers[index].bone_one_price) {
                     price_containers[index].bone_one_price = item.item_price;
                     return 1; 
                 }
-            } else if (item.market_order_type == 2) {
+            } else if (item.market_order_type == BUY_ORDER) {
                 if (item.item_price > price_containers[index].bone_one_price) {
                     price_containers[index].bone_one_price = item.item_price;
                     return 1; 
                 }
             }
-        } else if(item.market_parse_type == 2 && item.market_order_type == 1) {
+        } else if(item.market_parse_type == ONLY_SELL_ORDER && item.market_order_type == SELL_ORDER) {
 
             if (price_containers[index].bone_one_price == 0.0) {
                 price_containers[index].bone_one_price = item.item_price;
@@ -244,7 +243,7 @@ int compare_bone_prices(PriceContainer *price_containers, MarketItem item, const
                 price_containers[index].bone_one_price = item.item_price;
                 return 1; 
             }
-        } else if(item.market_parse_type == 3 && item.market_order_type == 2) {
+        } else if(item.market_parse_type == ONLY_BUY_ORDER && item.market_order_type == BUY_ORDER) {
 
             if (price_containers[index].bone_one_price == 0.0) {
                 price_containers[index].bone_one_price = item.item_price;
@@ -259,25 +258,25 @@ int compare_bone_prices(PriceContainer *price_containers, MarketItem item, const
         if (item.item_price > MARKET_COST_OVERFLOW)
             return 1;
         
-        if (item.market_parse_type == 1) {
+        if (item.market_parse_type == LOWEST_LISTING) {
 
             if (price_containers[index].bone_two_price == 0.0) {
                 price_containers[index].bone_two_price = item.item_price;
                 return 1; 
             } 
 
-            if (item.market_order_type == 1) {
+            if (item.market_order_type == SELL_ORDER) {
                 if (item.item_price < price_containers[index].bone_two_price || item.item_price > price_containers[index].bone_two_price) {
                     price_containers[index].bone_two_price = item.item_price;
                     return 1; 
                 }
-            } else if (item.market_order_type == 2) {
+            } else if (item.market_order_type == BUY_ORDER) {
                 if (item.item_price > price_containers[index].bone_two_price) {
                     price_containers[index].bone_two_price = item.item_price;
                     return 1; 
                 }
             }
-        } else if(item.market_parse_type == 2 && item.market_order_type == 1) {
+        } else if(item.market_parse_type == ONLY_SELL_ORDER && item.market_order_type == SELL_ORDER) {
 
             if (price_containers[index].bone_two_price == 0.0) {
                 price_containers[index].bone_two_price = item.item_price;
@@ -286,7 +285,7 @@ int compare_bone_prices(PriceContainer *price_containers, MarketItem item, const
                 price_containers[index].bone_two_price = item.item_price;
                 return 1; 
             }
-        } else if(item.market_parse_type == 3 && item.market_order_type == 2) {
+        } else if(item.market_parse_type == ONLY_BUY_ORDER && item.market_order_type == BUY_ORDER) {
             
             if (price_containers[index].bone_two_price == 0.0) {
                 price_containers[index].bone_two_price = item.item_price;
