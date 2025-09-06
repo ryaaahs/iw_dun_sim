@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
     SIGIL_COST_PER_HOUR = (HOUR_IN_SECONDS / (RUNIC_BASE_TIME / ( 1 + (json_object_dotget_number(player, "sigil_level") * RUNIC_SCALE_VALUE )))) * SIGIL_COST;
 
     if (SIMULATED_HOURS < 1) {
-        printf("'simulation_values.json' > config > simulated_hours must be 1 or higher");
+        printf("'simulation_values.json' > config > simulated_hours must be 1 or higher \n");
         return 0;
     }
 

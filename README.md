@@ -65,54 +65,54 @@ Usage
 	Key                       Value
 	-----                     -----
 	Level                     100
-	Simulated Hours           168
-	Rolls (AVG Hours)         499
-	Rolls                     83,976
-	Double Loot Procs         4,588
-	Total Keys                9,408
-	Total Keys Preserved      585
+	Simulated Hours           24
+	Rolls (AVG Hours)         643
+	Rolls                     15,444
+	Double Loot Procs         1,134
+	Total Keys                1,440
+	Total Keys Preserved      83
 |--------------------------------------------------------------|
 Consumed
 	Item                      Gold Per Hour
 	-----                     -----
-	Pie                       87,360 / hour
-	Potion                    37,044 / hour
-	Sigil                     2,912 / hour
-	Keys                      87,704 / hour
+	Pie                       69,400 / hour
+	Potion                    30,889 / hour
+	Sigil                     23,128 / hour
+	Keys                      74,748 / hour
 |--------------------------------------------------------------|
 Loot (AVG Hours)
 	Item                      Amount          Gold Per Hour
 	-----                     -----           ----------
-	Gold                      1               170,994 / hour
-	Giant Fang                419             36,079 / hour
-	Giant Bone                80              6,754 / hour
-	Large Fang                80              9,549 / hour
-	Ancient Log               108             9,662 / hour
-	Infernal Ore              107             7,714 / hour
-	Snapdragon                107             6,547 / hour
-	King Crab                 106             8,304 / hour
-	Moonstone                 3               3,210 / hour
-	Onyx                      4               3,874 / hour
-Total Gold (AVG Hours): 262,691
+	Gold                      1               219,947 / hour
+	Giant Fang                537             24,176 / hour
+	Giant Bone                105             6,744 / hour
+	Large Fang                107             7,284 / hour
+	Ancient Log               145             8,878 / hour
+	Infernal Ore              130             6,777 / hour
+	Snapdragon                132             6,604 / hour
+	King Crab                 138             8,566 / hour
+	Moonstone                 4               3,990 / hour
+	Onyx                      5               5,360 / hour
+Total Gold (AVG Hours): 298,328
 |--------------------------------------------------------------|
 Loot (Total)
 	Item                      Amount          Total Gold
 	-----                     -----           ----------
-	Gold                      28,727,144      28,727,144 coins
-	Giant Fang                70,481          6,061,366 coins
-	Giant Bone                13,509          1,134,756 coins
-	Large Fang                13,481          1,604,239 coins
-	Ancient Log               18,239          1,623,271 coins
-	Infernal Ore              18,001          1,296,072 coins
-	Snapdragon                18,033          1,100,013 coins
-	King Crab                 17,886          1,395,108 coins
-	Moonstone                 642             539,280 coins
-	Onyx                      678             650,880 coins
-Total Gold: 44,132,129
+	Gold                      5,278,747       5,278,747 coins
+	Giant Fang                12,894          580,230 coins
+	Giant Bone                2,529           161,856 coins
+	Large Fang                2,571           174,828 coins
+	Ancient Log               3,493           213,073 coins
+	Infernal Ore              3,128           162,656 coins
+	Snapdragon                3,170           158,500 coins
+	King Crab                 3,316           205,592 coins
+	Moonstone                 114             95,760 coins
+	Onyx                      134             128,640 coins
+Total Gold: 7,159,882
 |--------------------------------------------------------------|
 Profits
-Gold/hour (Produced): 262,691
-Gold/hour (Equipment): 215,020
-Gold/hour (Total): 47,670
+Gold/hour (Produced): 298,328
+Gold/hour (Equipment): 198,165
+Gold/hour (Total): 100,162
 |--------------------------------------------------------------|
 ```
