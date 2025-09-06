@@ -6,19 +6,33 @@ C CLI application to simulate the loot drops for IWRPG Dungeons
 ## Requirements
 GNU Make  
 
-## Usage:  
+## Building and Compiling:  
 Create your own copy of `simulation_values_template.json` and rename to `simulation_values.json` within /json  
 Update the values within the `simulation_values.json` file  
 Pull market data from ironwoodrpg.com `getMarketData` API call and paste response into a new `market_data.json` file in /json   
-Values that need to be updated:  
+Simulation values that need to be updated:  
     -config  
     -player  
     -dungeon `monsters_hour` and `food_hour` for each entry    
-
 Once the simulation.json is fleshed out you can run the simulation!  
 First build the project using `make`, this will create the build folder with objects/executable used to run the simulation.  
 From there you can run the project using `make run`, default is `market_parse=1; display_type=100;`  
 You can change the options by providing arguments like so `make run MARKET_PARSE=2 DISPLAY_TYPE=0`  
+
+## Release Usage:
+Download either the windows or linux build from the latest release  
+Unzip the contents  
+Rename `simulation_values_template.json` to `simulation_values.json` within /json  
+Update the values within the `simulation_values.json` file  
+Pull market json data from ironwoodrpg.com `getMarketData` API call and paste response into a new `market_data.json` file in /json   
+Simulation values that need to be updated:  
+    -config  
+    -player  
+    -dungeon `monsters_hour` and `food_hour` for each entry  
+Open command prompt or terminal and run the application  
+
+Windows sample: `.\iw_dun_sim.exe .\json\simulation_values.json 2 100`  
+Linux sample: `./iw_dun_sim ./json/simulation_values.json 2 100`  
 
 ## Example Output:
 ```
