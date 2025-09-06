@@ -6,7 +6,7 @@ C CLI application to simulate the loot drops for IWRPG Dungeons
 ## Requirements
 GNU Make  
 
-## Building and Compiling:  
+## Source Usage:  
 Create your own copy of `simulation_values_template.json` and rename to `simulation_values.json` within /json  
 Update the values within the `simulation_values.json` file  
 Pull market data from ironwoodrpg.com `getMarketData` API call and paste response into a new `market_data.json` file in /json   
