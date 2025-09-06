@@ -4,6 +4,8 @@
 /build
 simulation_values.json
 market_data.json
+iw_dun_sim_windows_build.zip
+iw_dun_sim_linux_build.zip
 
 # Object files
 *.o

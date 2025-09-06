@@ -1,4 +1,5 @@
 CC := gcc
+
 CFLAGS := -Wall -Wextra -std=c99 -pedantic -g
 
 SRC_DIR := src
@@ -16,11 +17,7 @@ OBJS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.o, $(SRCS))
 
 TARGET := $(BUILD_DIR)/iw_dun_sim
 
-all: $(BUILD_DIR) $(TARGET)
-
-# Create build directory if it doesn't exist
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+all: $(TARGET)
 
 # $^ All prerequisites of the rule (places in $(OBJS))
 # $@ Name of the target to produc (build/iw_dun_sim)
@@ -29,12 +26,24 @@ $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
 
 # Compile each source c file into an object file into build
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) $(CFLAGS) -c $^ -o $@
 
-clean:
-	rm -rf $(BUILD_DIR)
+$(BUILD_DIR):
+# Create build directory if it doesn't exist
+ifeq ($(OS), Windows_NT)
+	mkdir $(BUILD_DIR)
+else
+	mkdir -p $(BUILD_DIR)
+endif
 
+clean:
+ifeq ($(OS), Windows_NT)
+	del /s /q $(BUILD_DIR)
+else
+	rm -rf $(BUILD_DIR)
+endif
+	
 run: 
 	$(TARGET) $(SIM_JSON) $(MARKET_PARSE) $(DISPLAY_TYPE)
 

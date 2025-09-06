@@ -142,6 +142,11 @@ int main(int argc, char *argv[]) {
 
     SIGIL_COST_PER_HOUR = (HOUR_IN_SECONDS / (RUNIC_BASE_TIME / ( 1 + (json_object_dotget_number(player, "sigil_level") * RUNIC_SCALE_VALUE )))) * SIGIL_COST;
 
+    if (SIMULATED_HOURS < 1) {
+        printf("'simulation_values.json' > config > simulated_hours must be 1 or higher");
+        return 0;
+    }
+
     if (parse_market_file != 0) {
         parse_market_data(root_value, parse_market_file);
     }
@@ -311,7 +316,7 @@ int main(int argc, char *argv[]) {
         
         assign_market_values(game_values, item_drops, json_array_get_count(drops)); 
 
-        if (SIMULATED_HOURS > 1) {
+        if (SIMULATED_HOURS >= 1) {
             printf("Loot (AVG Hours)\n");
             printf("\t%-25s %-15s %s\n", "Item", "Amount", "Gold Per Hour");
             printf("\t%-25s %-15s %s\n", "-----", "-----", "----------");
