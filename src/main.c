@@ -70,11 +70,14 @@ int main(int argc, char *argv[]) {
     unsigned int SIMULATED_HOURS;
     unsigned int KEYS_PER_HOUR;
     unsigned int FOOD_PER_HOUR;
+    unsigned int POTIONS_PER_HOUR;
+    unsigned int SIGIL_PER_HOUR;
     unsigned int FOOD_COST = 0;
     unsigned int POTION_COST = 0;
     unsigned int SIGIL_COST = 0; 
 
     unsigned int rolls = 0;
+    unsigned int double_loot_rolls = 0;
     unsigned int banked_bone_one = 0;
     unsigned int banked_bone_two = 0;
     unsigned int total_keys_used = 0;
@@ -138,9 +141,11 @@ int main(int argc, char *argv[]) {
     INSATIABLE_PIES_PER_HOUR =  (HOUR_IN_SECONDS / (json_object_dotget_number(player, "food_health") / json_object_dotget_number(player, "insatiable_consume_rate")));
     INSATIABLE_COST_PER_HOUR = INSATIABLE_PIES_PER_HOUR * FOOD_COST;
 
-    POTION_COST_PER_HOUR = (HOUR_IN_SECONDS / (POTENT_BASE_TIME / ( 1 + (json_object_dotget_number(player, "potent_level") * POTENT_SCALE_VALUE)))) * POTION_COST;
+    POTIONS_PER_HOUR = (HOUR_IN_SECONDS / (POTENT_BASE_TIME / ( 1 + (json_object_dotget_number(player, "potent_level") * POTENT_SCALE_VALUE)))); 
+    POTION_COST_PER_HOUR = POTIONS_PER_HOUR * POTION_COST;
 
-    SIGIL_COST_PER_HOUR = (HOUR_IN_SECONDS / (RUNIC_BASE_TIME / ( 1 + (json_object_dotget_number(player, "sigil_level") * RUNIC_SCALE_VALUE )))) * SIGIL_COST;
+    SIGIL_PER_HOUR = (HOUR_IN_SECONDS / (RUNIC_BASE_TIME / ( 1 + (json_object_dotget_number(player, "sigil_level") * RUNIC_SCALE_VALUE ))));
+    SIGIL_COST_PER_HOUR = SIGIL_PER_HOUR * SIGIL_COST;
 
     if (SIMULATED_HOURS < 1) {
         printf("'simulation_values.json' > config > simulated_hours must be 1 or higher \n");
@@ -175,6 +180,7 @@ int main(int argc, char *argv[]) {
         drops = json_object_get_array(dungeon, "drops");
         item_drops = malloc(json_array_get_count(drops) * sizeof(Item)); 
         rolls = 0;
+        double_loot_rolls = 0;
         banked_bone_one = 0;
         banked_bone_two = 0;
         total_gold_value = 0;
@@ -211,35 +217,59 @@ int main(int argc, char *argv[]) {
             }
 
             if (PLAYER_DOUBLE_LOOT_CHANCE >= rand_zero_one()) {
-                rolls += MONSTERS_PER_KEY; 
+                double_loot_rolls += MONSTERS_PER_KEY; 
                 total_double_loot_procs++;
             }
         }
-
         printf("|--------------------------------------------------------------|\n");
-        printf("Usage\n");
+        printf("Simulation\n");
         printf("\t%-25s %s\n", "Key", "Value");
         printf("\t%-25s %s\n", "-----", "-----");
         printf("\t%-25s %0.f\n", "Level", json_object_get_number(dungeon, "level"));
         printf("\t%-25s ", "Simulated Hours"); printf_commas(SIMULATED_HOURS, 0);
         printf("\n");
+        printf("\n");
 
-        if (SIMULATED_HOURS > 1) {
-            printf("\t%-25s ", "Rolls (AVG Hours)"); printf_commas(rolls / SIMULATED_HOURS, 0);
-            printf("\n");
-        } 
-
+        printf("\t%-25s ", "Rolls (AVG Hours)"); printf_commas(rolls / SIMULATED_HOURS, 0);
+        printf("\n");
         printf("\t%-25s ", "Rolls"); printf_commas(rolls, 0);
         printf("\n");
-        printf("\t%-25s ", "Double Loot Procs"); printf_commas(total_double_loot_procs, 0);
+
+        printf("\t%-25s ", "Loot Rolls (AVG Hours)"); printf_commas(double_loot_rolls / SIMULATED_HOURS, 0);
         printf("\n");
-        printf("\t%-25s ", "Total Keys"); printf_commas((SIMULATED_HOURS * KEYS_PER_HOUR), 0);
+        printf("\t%-25s ", "Total Loot Rolls"); printf_commas(double_loot_rolls, 0);
+        printf("\n");
+
+        rolls += double_loot_rolls;
+
+        printf("\t%-25s ", "Total Rolls (AVG Hours)"); printf_commas(rolls / SIMULATED_HOURS, 0);
+        printf("\n");
+        printf("\t%-25s ", "Total Rolls"); printf_commas(rolls, 0);
+        printf("\n");
+
+        printf("\n");
+        printf("\t%-25s ", "Double Loot Procs"); printf_commas(total_double_loot_procs, 0);
         printf("\n");
         printf("\t%-25s ", "Total Keys Preserved"); printf_commas(total_preserved_keys, 0);
         printf("\n");
 
+        snprintf(buffer, 50, "%s%s%s", "keys.", json_object_dotget_string(dungeon, "key.tag"), ".value");
+        KEY_COST_PER_HOUR = (((SIMULATED_HOURS * KEYS_PER_HOUR) - total_preserved_keys) * json_object_dotget_number(game_values, buffer)) / SIMULATED_HOURS;
+        
+
         printf("|--------------------------------------------------------------|\n");
-        printf("Consumed\n");
+        printf("Consumed (AVG Hours)\n");
+        printf("\t%-25s %s\n", "Item", "Value");
+        printf("\t%-25s %s\n", "-----", "-----");
+        printf("\t%-25s ", "Total Pies Per Hour"); printf_commas(INSATIABLE_PIES_PER_HOUR + FOOD_PER_HOUR, 0);
+        printf("\n");
+        printf("\t%-25s ", "Total Potions Per Hour"); printf_commas(POTIONS_PER_HOUR, 0);
+        printf("\n");
+        printf("\t%-25s ", "Total Sigils Per Hour"); printf_commas(SIGIL_PER_HOUR, 0);
+        printf("\n");
+        printf("\t%-25s ", "Total Keys Per Hour"); printf_commas(KEYS_PER_HOUR, 0);
+        printf("\n");
+        printf("\n");
         printf("\t%-25s %s\n", "Item", "Gold Per Hour");
         printf("\t%-25s %s\n", "-----", "-----");
         printf("\t%-25s ", "Pie"); printf_commas(food_cost_per_hour, 0);
@@ -248,10 +278,38 @@ int main(int argc, char *argv[]) {
         printf(" / hour\n");
         printf("\t%-25s ", "Sigil"); printf_commas(SIGIL_COST_PER_HOUR, 0);
         printf(" / hour\n");
-        snprintf(buffer, 50, "%s%s%s", "keys.", json_object_dotget_string(dungeon, "key.tag"), ".value");
-        KEY_COST_PER_HOUR = (((SIMULATED_HOURS * KEYS_PER_HOUR) - total_preserved_keys) * json_object_dotget_number(game_values, buffer)) / SIMULATED_HOURS;
         printf("\t%-25s ", "Keys"); printf_commas(KEY_COST_PER_HOUR, 0);
         printf(" / hour\n");
+        printf("\n");
+        printf("Total Consumed Gold (AVG Hours): "); printf_commas(food_cost_per_hour + POTION_COST_PER_HOUR + SIGIL_COST_PER_HOUR + KEY_COST_PER_HOUR, 0);
+        printf("\n");
+        printf("|--------------------------------------------------------------|\n");
+
+        printf("Consumed (Total)\n");
+        printf("\t%-25s %s\n", "Item", "Value");
+        printf("\t%-25s %s\n", "-----", "-----");
+        printf("\t%-25s ", "Total Pies"); printf_commas((INSATIABLE_PIES_PER_HOUR + FOOD_PER_HOUR) * SIMULATED_HOURS, 0);
+        printf("\n");
+        printf("\t%-25s ", "Total Potions"); printf_commas((SIMULATED_HOURS * POTIONS_PER_HOUR), 0);
+        printf("\n");
+        printf("\t%-25s ", "Total Sigils"); printf_commas((SIMULATED_HOURS * SIGIL_PER_HOUR), 0);
+        printf("\n");
+        printf("\t%-25s ", "Total Keys"); printf_commas((SIMULATED_HOURS * KEYS_PER_HOUR), 0);
+        printf("\n");
+        printf("\n");
+        printf("\t%-25s %s\n", "Item", "Total Gold");
+        printf("\t%-25s %s\n", "-----", "-----");
+        printf("\t%-25s ", "Pie"); printf_commas(food_cost_per_hour * SIMULATED_HOURS, 0);
+        printf(" coins\n");;
+        printf("\t%-25s ", "Potion"); printf_commas(POTION_COST_PER_HOUR * SIMULATED_HOURS, 0);
+        printf(" coins\n");
+        printf("\t%-25s ", "Sigil"); printf_commas(SIGIL_COST_PER_HOUR * SIMULATED_HOURS, 0);
+        printf(" coins\n");
+        printf("\t%-25s ", "Keys"); printf_commas(KEY_COST_PER_HOUR * SIMULATED_HOURS, 0);
+        printf(" coins\n");
+        printf("\n");
+        printf("Total Consumed Gold: "); printf_commas((food_cost_per_hour + POTION_COST_PER_HOUR + SIGIL_COST_PER_HOUR + KEY_COST_PER_HOUR) * SIMULATED_HOURS, 0);
+        printf("\n");
         printf("|--------------------------------------------------------------|\n");
 
         /* Run rolls aganist loot rates */ 
@@ -336,7 +394,8 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            printf("Total Gold (AVG Hours): "); printf_commas(total_gold_value / SIMULATED_HOURS, 0);
+            printf("\n");
+            printf("Total Loot Gold (AVG Hours): "); printf_commas(total_gold_value / SIMULATED_HOURS, 0);
             printf("\n");
             printf("|--------------------------------------------------------------|\n");
         }
@@ -356,8 +415,9 @@ int main(int argc, char *argv[]) {
                 printf_commas((item_drops[j].value * item_drops[j].amount), 0);
                 printf(" coins\n"); 
             }
-        }
-        printf("Total Gold: "); printf_commas(total_gold_value, 0);
+        } 
+        printf("\n");
+        printf("Total Loot Gold: "); printf_commas(total_gold_value, 0);
         printf("\n");
         printf("|--------------------------------------------------------------|\n");
         printf("Profits\n");
