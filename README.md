@@ -31,7 +31,7 @@ Simulation values that need to be updated:
     -dungeon `monsters_hour` and `food_hour` for each entry  
 Open command prompt or terminal and run the application  
 
-Windows sample: `.\iw_dun_sim.exe .\json\simulation_values.json 2 100`  
+Windows sample: Run the `ironwood_dungeon_simulation.bat` file
 Linux sample: `./iw_dun_sim ./json/simulation_values.json 2 100`  
 
 ## Example Output:
